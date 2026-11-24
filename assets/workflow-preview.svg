@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 272" width="820" height="272" fill="none">
+  <defs>
+    <linearGradient id="wf-bg" x1="0" y1="0" x2="820" y2="272" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="55%" stop-color="#111c33"/>
+      <stop offset="100%" stop-color="#0b1324"/>
+    </linearGradient>
+    <linearGradient id="wf-accent" x1="0" y1="0" x2="220" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#2dd4bf"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="1" y="1" width="818" height="270" rx="16" fill="url(#wf-bg)" stroke="#334155" stroke-width="1.5"/>
+
+  <!-- Top window bar -->
+  <circle cx="24" cy="24" r="4.5" fill="#fb7185" fill-opacity="0.75"/>
+  <circle cx="40" cy="24" r="4.5" fill="#fbbf24" fill-opacity="0.75"/>
+  <circle cx="56" cy="24" r="4.5" fill="#34d399" fill-opacity="0.75"/>
+  <text x="76" y="28" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" font-weight="600">Google Antigravity · Native Zero-UI /fork Experience</text>
+  <rect x="646" y="12" width="148" height="22" rx="11" fill="#132a3a" stroke="#38bdf8" stroke-opacity="0.35" stroke-width="1"/>
+  <text x="720" y="26.5" text-anchor="middle" fill="#7dd3fc" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10.5" font-weight="600">0 Popups · 0 Web UI</text>
+  <line x1="1" y1="44" x2="819" y2="44" stroke="#1e293b" stroke-width="1"/>
+
+  <!-- Left Sidebar Mockup -->
+  <rect x="1" y="45" width="214" height="226" rx="0" fill="#0b1220"/>
+  <line x1="215" y1="45" x2="215" y2="271" stroke="#1e293b" stroke-width="1"/>
+
+  <text x="20" y="69" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10" font-weight="700" letter-spacing="0.06em">PROJECTS / MY-APP</text>
+
+  <!-- Active forked session -->
+  <rect x="12" y="80" width="190" height="44" rx="8" fill="#13253a" stroke="#2dd4bf" stroke-opacity="0.45" stroke-width="1"/>
+  <circle cx="26" cy="96" r="3.5" fill="#2dd4bf"/>
+  <text x="36" y="100" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="700">Auth Refactor (fork)</text>
+  <text x="36" y="116" fill="#5eead4" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10">13.0k tok · fresh · now</text>
+
+  <!-- Original session -->
+  <rect x="12" y="132" width="190" height="42" rx="8" fill="#111a2e" stroke="#1e293b" stroke-width="1"/>
+  <circle cx="26" cy="148" r="3.5" fill="#94a3b8"/>
+  <text x="36" y="152" fill="#cbd5e1" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" font-weight="500">Auth Refactor</text>
+  <text x="36" y="167" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10">443.3k tok · preserved</text>
+
+  <!-- Sidebar note -->
+  <rect x="12" y="190" width="190" height="66" rx="8" fill="#0f172a" stroke="#1e293b" stroke-width="1"/>
+  <text x="22" y="209" fill="#94a3b8" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="10.5" font-weight="600">Live Sidebar Title Sync</text>
+  <text x="22" y="226" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="9.5">Reads annotations/&lt;id&gt;.pbtxt</text>
+  <text x="22" y="242" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="9.5">(fork) -&gt; (fork #2) auto</text>
+
+  <!-- Right Main Chat Panel -->
+  <!-- Step 1: 0-token PreInvocation nudge -->
+  <rect x="234" y="60" width="564" height="54" rx="10" fill="#172033" stroke="#f59e0b" stroke-opacity="0.35" stroke-width="1"/>
+  <rect x="234" y="70" width="3" height="34" rx="1.5" fill="#f59e0b"/>
+  <text x="250" y="81" fill="#fde68a" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="11.5" font-weight="600">0-Token PreInvocation Nudge (when context bloats)</text>
+  <text x="250" y="100" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10.5">Context ~443k tok (heavy noise). Stay in-place: /compact  |  Lossless fresh chat: /fork</text>
+
+  <!-- Step 2: User invokes /fork -->
+  <rect x="698" y="126" width="100" height="34" rx="10" fill="#1e3a5f" stroke="#38bdf8" stroke-opacity="0.45" stroke-width="1"/>
+  <text x="748" y="147" text-anchor="middle" fill="#e0f2fe" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="13" font-weight="700">/fork</text>
+
+  <!-- Step 3: Instant 2-line native reply -->
+  <rect x="234" y="172" width="564" height="84" rx="10" fill="#131f35" stroke="#2dd4bf" stroke-opacity="0.4" stroke-width="1"/>
+  <rect x="234" y="182" width="3" height="64" rx="1.5" fill="url(#wf-accent)"/>
+  <text x="250" y="196" fill="#f8fafc" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12.5" font-weight="600">Forked cleanly:  <tspan fill="#5eead4" text-decoration="underline">Auth Refactor (fork)</tspan>  <tspan fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10.5">(conversation://e772c9a7...)</tspan></text>
+  <text x="250" y="218" fill="#cbd5e1" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="11">443,258 -&gt; ~13,030 tokens (-97%) · same folder · model inherited · lossless traceback</text>
+  <text x="250" y="241" fill="#64748b" font-family="ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace" font-size="10">Git anchor: branch feat/auth + dirty diff  |  20-class secret redaction active</text>
+</svg>
