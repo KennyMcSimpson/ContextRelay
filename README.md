@@ -25,9 +25,9 @@ Long coding sessions slow down and lose precision as verbose tool logs, progress
 | **Compress in-place** (stay in the same thread) | `/compact` (Antigravity built-in) | Calls an LLM to summarize earlier turns inside the existing conversation. |
 | **Lossless denoised fresh session** (zero summarization degradation) | **`/fork`** (Context Relay) | **0-LLM deterministic surgery**: strips bulky tool noise, anchors real `git status`/`git diff`, preserves 100% verbatim goals & conclusions with lossless transcript traceback, redacts 20 secret classes, inherits your model, and launches `<original title> (fork)` in one click. |
 
-### Key Highlights (`v0.2.1`)
+### Key Highlights (`v0.2.2`)
 
-- **One-Click `/fork`, Zero Popups by Default**: Typing `/fork` never opens a modal or webpage — it immediately cleans your current conversation in the original project folder, appends ` (fork)` to the title, and replies with a 2-line receipt and a clickable `[Title (fork)](conversation://<id>)` instant-jump link.
+- **One-Click `/fork`, Zero Popups by Default**: Typing `/fork` never opens a modal or webpage — it immediately cleans your current conversation in the original project folder, reads your live sidebar renamed title (via Antigravity's plain-text `annotations/<id>.pbtxt`, zero SQLite) to append ` (fork)`, and replies with a 2-line receipt and a clickable `[Title (fork)](conversation://<id>)` instant-jump link.
 - **Ultra-Clean `/` Menu**: Only `/fork` appears in Antigravity's slash-command menu (legacy `relay` and `context-relay` skills are hidden with `disable-slash-command: true`).
 - **Automatic 0-Token `PreInvocation` Bloat Nudge**: `hooks/nudge.mjs` monitors transcript weight with zero LLM cost and nudges you only when context bloat crosses threshold (opt out anytime with `CONTEXT_RELAY_NUDGE=0`).
 - **Cross-Project & Turn-Bounded Forking**: Run `/fork <project-keyword>` to carry curated context straight into another registered workspace (0 popups on exact match; at most 1 native `ask_question` card if ambiguous), or `/fork 第N轮` to cleanly branch from an earlier turn.

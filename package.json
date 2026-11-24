@@ -1,6 +1,6 @@
 {
   "name": "context-relay",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Zero-UI native /fork for Google Antigravity — one-click denoised conversation forking, 0-token bloat nudges, deterministic Git-grounded handoffs with verbatim traceback, 20-category secret redaction, and shareable token-savings cards.",
   "type": "module",
   "private": false,

@@ -98,8 +98,8 @@ function assertNoSymlinksRecursive(rootDir) {
   return checkedCount;
 }
 
-describe('manifests (v0.2.1 zero-UI native /fork plugin): plugin.json, hooks.json, sidecar.json, SKILL.md, benchmark SVG', () => {
-  test('plugin.json has version 0.2.1, only Antigravity whitelisted top-level fields, <=3 /fork suggestedPrompts, and existing logo', () => {
+describe('manifests (v0.2.2 zero-UI native /fork plugin): plugin.json, hooks.json, sidecar.json, SKILL.md, benchmark SVG', () => {
+  test('plugin.json has version 0.2.2, only Antigravity whitelisted top-level fields, <=3 /fork suggestedPrompts, and existing logo', () => {
     const pluginPath = path.join(REPO_ROOT, 'plugin.json');
     assert.ok(fs.existsSync(pluginPath), 'plugin.json must exist');
 
@@ -113,7 +113,7 @@ describe('manifests (v0.2.1 zero-UI native /fork plugin): plugin.json, hooks.jso
       );
     }
 
-    assert.equal(manifest.version, '0.2.1', 'plugin.json version must be 0.2.1');
+    assert.equal(manifest.version, '0.2.2', 'plugin.json version must be 0.2.2');
     assert.equal(typeof manifest.name, 'string');
     assert.ok(manifest.name.trim().length > 0);
     assert.equal(typeof manifest.displayName, 'string');

@@ -22,6 +22,7 @@ import {
   discoverAllSources,
   findSessionSource,
   detectAdapterForPath,
+  readSessionAnnotation,
 } from '../adapters/index.mjs';
 import { createAgentApiClient } from './agentapi.mjs';
 
@@ -278,6 +279,14 @@ function normalizeSource(raw) {
     size = st.size;
   }
 
+  let annotationMtimeMs = Number(raw.annotationMtimeMs);
+  let annotationSize = Number(raw.annotationSize);
+  if (!Number.isFinite(annotationMtimeMs) || !Number.isFinite(annotationSize)) {
+    const annMeta = readSessionAnnotation(filePath, sessionId, { statOnly: true });
+    annotationMtimeMs = annMeta.mtimeMs || 0;
+    annotationSize = annMeta.size || 0;
+  }
+
   return {
     sessionId,
     agent: safeStr(raw.agent) || 'antigravity',
@@ -286,10 +295,20 @@ function normalizeSource(raw) {
     fullFilePath: safeStr(raw.fullFilePath) || resolveSiblingFullFile(filePath),
     mtimeMs,
     size,
+    annotationMtimeMs,
+    annotationSize,
   };
 }
 
-function buildIndexEntry(source, parsed, existing = null) {
+function prependTitleToSearchText(existingSearchText, title) {
+  const cleanTitle = safeStr(title);
+  const existing = typeof existingSearchText === 'string' ? existingSearchText : '';
+  if (!cleanTitle) return existing;
+  if (existing.toLowerCase().includes(cleanTitle.toLowerCase())) return existing;
+  return clampText(collapseWhitespace(`${cleanTitle}\n${existing}`), MAX_SEARCH_TEXT_LEN);
+}
+
+function buildIndexEntry(source, parsed, existing = null, annotation = null) {
   const turns = Array.isArray(parsed?.turns) ? parsed.turns : [];
 
   const filesModified = toUniqueStrings(
@@ -317,7 +336,11 @@ function buildIndexEntry(source, parsed, existing = null) {
     safeStr(parsed?.lastModel) || modelsUsed[modelsUsed.length - 1] || firstModel;
 
   const firstUserText = safeStr(turns[0]?.userPreview || turns[0]?.userText);
+  const resolvedAnnotation =
+    annotation || readSessionAnnotation(source.filePath, source.sessionId);
+  const annotationTitle = safeStr(resolvedAnnotation?.title);
   const title =
+    annotationTitle ||
     safeStr(parsed?.title) ||
     (firstUserText ? clampText(collapseWhitespace(firstUserText), 120) : '') ||
     source.sessionId;
@@ -395,6 +418,9 @@ function buildIndexEntry(source, parsed, existing = null) {
     fullFilePath: source.fullFilePath || null,
     mtimeMs: source.mtimeMs,
     size: source.size,
+    annotationMtimeMs: resolvedAnnotation?.mtimeMs || source.annotationMtimeMs || 0,
+    annotationSize: resolvedAnnotation?.size || source.annotationSize || 0,
+    hasAnnotationTitle: Boolean(annotationTitle),
     title,
     firstModel,
     lastModel,
@@ -614,14 +640,41 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
       seenIds.add(source.sessionId);
       const prev = snapshot.sessions[source.sessionId];
 
-      if (
-        !force &&
-        prev &&
+      const transcriptSame =
+        Boolean(prev) &&
         canonicalFileKey(prev.filePath || '') === canonicalFileKey(source.filePath) &&
         prev.mtimeMs === source.mtimeMs &&
-        prev.size === source.size
-      ) {
+        prev.size === source.size;
+      const annotationSame =
+        Boolean(prev) &&
+        (prev.annotationMtimeMs || 0) === (source.annotationMtimeMs || 0) &&
+        (prev.annotationSize || 0) === (source.annotationSize || 0);
+
+      if (!force && transcriptSame && annotationSame) {
         skipped += 1;
+        continue;
+      }
+
+      const annotation = readSessionAnnotation(source.filePath, source.sessionId);
+      const annTitle = safeStr(annotation?.title);
+      if (!force && transcriptSame && !annotationSame && (annTitle || !prev.hasAnnotationTitle)) {
+        if (annTitle) {
+          parsedEntries.set(source.sessionId, {
+            ...prev,
+            title: annTitle,
+            annotationMtimeMs: annotation.mtimeMs,
+            annotationSize: annotation.size,
+            hasAnnotationTitle: true,
+            searchText: prependTitleToSearchText(prev.searchText, annTitle),
+          });
+        } else {
+          parsedEntries.set(source.sessionId, {
+            ...prev,
+            annotationMtimeMs: annotation.mtimeMs,
+            annotationSize: annotation.size,
+            hasAnnotationTitle: false,
+          });
+        }
         continue;
       }
 
@@ -629,7 +682,7 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
       if (readRes === null) continue;
       const steps = extractSteps(readRes);
       const parsed = parseSessionTranscript(steps, source);
-      const entry = buildIndexEntry(source, parsed, prev);
+      const entry = buildIndexEntry(source, parsed, prev, annotation);
       parsedEntries.set(source.sessionId, entry);
     }
 
@@ -703,6 +756,7 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
       return { updated: false, sessionId: '' };
     }
 
+    const annMeta = readSessionAnnotation(absPath, resolvedSessionId, { statOnly: true });
     const source = {
       sessionId: resolvedSessionId,
       agent: safeStr(inferred?.agent) || safeStr(adapter?.id) || 'antigravity',
@@ -711,26 +765,54 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
       fullFilePath: resolveSiblingFullFile(absPath),
       mtimeMs: st.mtimeMs,
       size: st.size,
+      annotationMtimeMs: annMeta.mtimeMs,
+      annotationSize: annMeta.size,
     };
 
     const snapshot = loadIndex();
     const existingSnap = snapshot.sessions[resolvedSessionId];
-    if (
-      existingSnap &&
+    const transcriptSame =
+      Boolean(existingSnap) &&
       canonicalFileKey(existingSnap.filePath || '') === canonicalFileKey(source.filePath) &&
       existingSnap.mtimeMs === source.mtimeMs &&
-      existingSnap.size === source.size
-    ) {
+      existingSnap.size === source.size;
+    const annotationSame =
+      Boolean(existingSnap) &&
+      (existingSnap.annotationMtimeMs || 0) === (source.annotationMtimeMs || 0) &&
+      (existingSnap.annotationSize || 0) === (source.annotationSize || 0);
+
+    if (transcriptSame && annotationSame) {
       return { updated: false, sessionId: resolvedSessionId };
     }
 
-    const readRes = readJsonlSteps(source.filePath);
-    if (readRes === null) {
-      return { updated: false, sessionId: resolvedSessionId };
+    const annotation = readSessionAnnotation(source.filePath, source.sessionId);
+    const annTitle = safeStr(annotation?.title);
+    let freshEntry;
+    if (transcriptSame && !annotationSame && (annTitle || !existingSnap.hasAnnotationTitle)) {
+      freshEntry = annTitle
+        ? {
+            ...existingSnap,
+            title: annTitle,
+            annotationMtimeMs: annotation.mtimeMs,
+            annotationSize: annotation.size,
+            hasAnnotationTitle: true,
+            searchText: prependTitleToSearchText(existingSnap.searchText, annTitle),
+          }
+        : {
+            ...existingSnap,
+            annotationMtimeMs: annotation.mtimeMs,
+            annotationSize: annotation.size,
+            hasAnnotationTitle: false,
+          };
+    } else {
+      const readRes = readJsonlSteps(source.filePath);
+      if (readRes === null) {
+        return { updated: false, sessionId: resolvedSessionId };
+      }
+      const steps = extractSteps(readRes);
+      const parsed = parseSessionTranscript(steps, source);
+      freshEntry = buildIndexEntry(source, parsed, existingSnap, annotation);
     }
-    const steps = extractSteps(readRes);
-    const parsed = parseSessionTranscript(steps, source);
-    const freshEntry = buildIndexEntry(source, parsed, existingSnap);
 
     ensureDir(resolvedDataDir);
     return withLock(lockPath, () => {
@@ -920,8 +1002,16 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
     const parsed = parseSessionTranscript(steps, source);
     if (!parsed || typeof parsed !== 'object') return null;
 
+    const liveAnnotation = readSessionAnnotation(source.filePath, source.sessionId);
+    const liveTitle =
+      safeStr(liveAnnotation?.title) ||
+      safeStr(parsed.title) ||
+      safeStr(cached?.title) ||
+      source.sessionId;
+
     return {
       ...parsed,
+      title: liveTitle,
       sessionId: safeStr(parsed.sessionId) || source.sessionId,
       agent: safeStr(parsed.agent) || source.agent,
       app: safeStr(parsed.app) || source.app,

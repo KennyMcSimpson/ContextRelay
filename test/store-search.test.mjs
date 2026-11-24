@@ -15,6 +15,7 @@ import {
   canonicalFileKey,
 } from '../core/fs-utils.mjs';
 import { createRelayStore } from '../core/store.mjs';
+import { parseAnnotationPbtxtTitle } from '../adapters/antigravity.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -578,5 +579,117 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
 
     const miss = store.listSessions({ q: 'midTurnNeedleGamma6677 nonexistentTerm999', hideSubagents: false });
     assert.equal(miss.sessions.length, 0);
+  });
+
+  test('parseAnnotationPbtxtTitle parses Antigravity .pbtxt titles accurately across escapes, comments, and nested blocks', () => {
+    assert.equal(
+      parseAnnotationPbtxtTitle('title:"反重力插件-1" last_user_view_time:{seconds:1795540462 nanos:666000000}'),
+      '反重力插件-1',
+    );
+    assert.equal(
+      parseAnnotationPbtxtTitle('title: "\\345\\217\\215\\351\\207\\215\\345\\212\\233-\\xe6\\x8f\\x92\\xe4\\xbb\\xb6"'),
+      '反重力-插件',
+    );
+    assert.equal(
+      parseAnnotationPbtxtTitle('title: "\\u53cd\\u91cd\\u529b \\"Pro\\" \\\\ v2"'),
+      '反重力 "Pro" \\ v2',
+    );
+    assert.equal(
+      parseAnnotationPbtxtTitle("title: 'Part A ' 'Part B'"),
+      'Part A Part B',
+    );
+    assert.equal(
+      parseAnnotationPbtxtTitle(
+        '# title: "commented-out"\nmeta { title: "nested-ignore" }\nnote: "title:\\"inside-string\\""\ntitle: "Real Sidebar Title"\n',
+      ),
+      'Real Sidebar Title',
+    );
+    assert.equal(
+      parseAnnotationPbtxtTitle('last_user_view_time:{seconds:1795540462 nanos:666000000}'),
+      '',
+    );
+    assert.equal(parseAnnotationPbtxtTitle('title: "unterminated'), '');
+  });
+
+  test('store reads live sidebar renamed title from annotations/<id>.pbtxt and hot-refreshes when only .pbtxt changes or clears', () => {
+    const sandbox = createTempDir('context-relay-annotations-');
+    const brainDir = path.join(sandbox, 'brain');
+    const annotationsDir = path.join(sandbox, 'annotations');
+    const dataDir = path.join(sandbox, 'data');
+    fs.mkdirSync(brainDir, { recursive: true });
+    fs.mkdirSync(annotationsDir, { recursive: true });
+    fs.mkdirSync(dataDir, { recursive: true });
+
+    const convId = 'conv-renamed-001';
+    const transcriptPath = writeSyntheticConversation(brainDir, convId, [
+      {
+        step_index: 0,
+        source: 'USER_EXPLICIT',
+        type: 'USER_INPUT',
+        status: 'DONE',
+        created_at: '2026-11-25T00:10:00.000Z',
+        content: '<USER_REQUEST>最初的长提问内容不应该覆盖用户重命名的标题</USER_REQUEST>',
+      },
+      {
+        step_index: 1,
+        source: 'MODEL',
+        type: 'PLANNER_RESPONSE',
+        status: 'DONE',
+        created_at: '2026-11-25T00:10:05.000Z',
+        model: 'gemini-4-neon',
+        input_tokens: 12000,
+        output_tokens: 180,
+        content: '收到，开始处理。',
+      },
+    ]);
+
+    const pbtxtPath = path.join(annotationsDir, `${convId}.pbtxt`);
+    fs.writeFileSync(
+      pbtxtPath,
+      'title:"反重力插件-1" last_user_view_time:{seconds:1795540462 nanos:666000000}',
+      'utf8',
+    );
+
+    process.env.CONTEXT_RELAY_BRAIN_ROOTS = brainDir;
+    const store = createRelayStore({ dataDir });
+
+    const firstSync = store.syncAll();
+    assert.equal(firstSync.updated, 1);
+
+    const listed1 = store.listSessions({ q: '反重力插件-1', hideSubagents: false });
+    assert.equal(listed1.sessions.length, 1);
+    assert.equal(listed1.sessions[0].title, '反重力插件-1');
+    assert.equal(store.getSessionDetail(convId)?.title, '反重力插件-1');
+
+    // Rename ONLY annotations/<id>.pbtxt without touching transcript.jsonl
+    fs.writeFileSync(
+      pbtxtPath,
+      'title:"反重力插件-终版" last_user_view_time:{seconds:1795540999 nanos:123000000}',
+      'utf8',
+    );
+    const futureTime = new Date(Date.now() + 5000);
+    fs.utimesSync(pbtxtPath, futureTime, futureTime);
+
+    const renameSync = store.syncAll();
+    assert.equal(renameSync.updated, 1, 'changing only .pbtxt must refresh cached index title');
+    assert.equal(store.listSessions({ q: '反重力插件-终版', hideSubagents: false }).sessions.length, 1);
+    assert.equal(store.getSessionDetail(convId)?.title, '反重力插件-终版');
+
+    // Clear title field in .pbtxt (keep only last_user_view_time) -> syncSingle restores transcript title
+    fs.writeFileSync(
+      pbtxtPath,
+      'last_user_view_time:{seconds:1795541500 nanos:0}',
+      'utf8',
+    );
+    const laterTime = new Date(Date.now() + 10000);
+    fs.utimesSync(pbtxtPath, laterTime, laterTime);
+
+    const clearSync = store.syncSingle(transcriptPath, convId);
+    assert.equal(clearSync.updated, true, 'clearing .pbtxt title must trigger restoration');
+    const detailAfterClear = store.getSessionDetail(convId);
+    assert.ok(
+      detailAfterClear?.title.includes('最初的长提问内容'),
+      `expected fallback to original transcript title, got: ${detailAfterClear?.title}`,
+    );
   });
 });

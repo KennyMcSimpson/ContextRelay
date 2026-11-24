@@ -1,6 +1,12 @@
 import { closeSync, openSync, readSync } from 'node:fs';
 import { isNotSymlink, safeStat } from '../core/fs-utils.mjs';
-import { antigravityAdapter } from './antigravity.mjs';
+import {
+  antigravityAdapter,
+  parseAnnotationPbtxtTitle,
+  readAnnotationForTranscript,
+} from './antigravity.mjs';
+
+export { parseAnnotationPbtxtTitle, readAnnotationForTranscript };
 
 export const ADAPTERS = [antigravityAdapter];
 
@@ -96,4 +102,8 @@ export function detectAdapterForPath(filePath) {
     if (adapter.matchesPath(filePath)) return adapter;
   }
   return sniffAdapterFromContent(filePath);
+}
+
+export function readSessionAnnotation(filePath, sessionId, options = {}) {
+  return readAnnotationForTranscript(filePath, sessionId, options);
 }
