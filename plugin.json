@@ -1,0 +1,14 @@
+{
+  "name": "context-relay",
+  "displayName": "Context Relay",
+  "version": "0.2.1",
+  "description": "Zero-UI native /fork for Google Antigravity: one-click denoised conversation forking, 0-token bloat nudges, deterministic Git-grounded handoffs with verbatim traceback, 20-category secret redaction, token-savings stats, and full-text session search.",
+  "homepage": "https://github.com/KennyMcSimpson/ContextRelay#readme",
+  "repository": "https://github.com/KennyMcSimpson/ContextRelay",
+  "logo": "assets/logo.svg",
+  "suggestedPrompts": [
+    "/fork",
+    "/fork 换到另一个项目目录继续",
+    "/fork stats 看看帮我省了多少 token"
+  ]
+}

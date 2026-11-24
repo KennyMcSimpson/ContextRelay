@@ -1,0 +1,18 @@
+{
+  "context-relay-indexer": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "node ./hooks/nudge.mjs",
+        "timeout": 5
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "node ./hooks/sync-turn.mjs",
+        "timeout": 10
+      }
+    ]
+  }
+}

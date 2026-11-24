@@ -1,0 +1,11 @@
+{
+  "command": "node",
+  "args": ["main.mjs"],
+  "restart_policy": "never",
+  "display_name": "Context Relay Warmup",
+  "description": "Headless background index and project mapping warmup for Context Relay (no web UI).",
+  "has_web_ui": false,
+  "agent_permissions": {
+    "allows_user_interactions": false
+  }
+}

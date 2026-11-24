@@ -1,0 +1,35 @@
+{
+  "name": "context-relay",
+  "version": "0.2.1",
+  "description": "Zero-UI native /fork for Google Antigravity — one-click denoised conversation forking, 0-token bloat nudges, deterministic Git-grounded handoffs with verbatim traceback, 20-category secret redaction, and shareable token-savings cards.",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KennyMcSimpson/ContextRelay.git"
+  },
+  "homepage": "https://github.com/KennyMcSimpson/ContextRelay#readme",
+  "bugs": {
+    "url": "https://github.com/KennyMcSimpson/ContextRelay/issues"
+  },
+  "keywords": [
+    "antigravity",
+    "google-antigravity",
+    "plugin",
+    "fork",
+    "context-management",
+    "token-savings",
+    "ai-agent"
+  ],
+  "bin": {
+    "context-relay": "./bin/context-relay.mjs"
+  },
+  "engines": {
+    "node": ">=22.15.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "serve": "node bin/context-relay.mjs serve"
+  }
+}

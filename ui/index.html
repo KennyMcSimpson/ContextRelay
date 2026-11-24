@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Context Relay — 上下文手术台</title>
+  <!-- HOST_PRELOAD -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div id="app" class="app">
+    <!-- Sticky Top Navigation -->
+    <header class="topbar" id="topbar">
+      <div class="topbar-row">
+        <div class="brand">
+          <span class="brand-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="6" cy="6" r="2.5"></circle>
+              <circle cx="6" cy="18" r="2.5"></circle>
+              <path d="M8.5 7.5 20 19"></path>
+              <path d="M8.5 16.5 14 11"></path>
+              <path d="M16 9l4-4"></path>
+              <path d="M16 5h4v4"></path>
+            </svg>
+          </span>
+          <span class="brand-title">Context Relay</span>
+          <span id="env-badge" class="pill pill-env" title="运行环境">Local Web</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="btn-sync" class="icon-btn" type="button" title="刷新会话与项目索引" aria-label="刷新索引">
+            <svg class="icon-sync" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+              <path d="M3 3v5h5"></path>
+              <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+              <path d="M16 16h5v5"></path>
+            </svg>
+          </button>
+          <button id="btn-theme" class="icon-btn hidden" type="button" title="切换亮色 / 暗色主题" aria-label="切换主题">
+            <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+            <svg class="icon-moon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <nav class="tabs" role="tablist" aria-label="主导航">
+        <button class="tab-btn active" type="button" role="tab" aria-selected="true" data-tab="surgery" id="tab-surgery">
+          <span>手术台</span>
+          <span class="tab-badge mono" id="badge-surgery">0</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="sessions" id="tab-sessions">
+          <span>会话雷达</span>
+          <span class="tab-badge mono" id="badge-sessions">0</span>
+        </button>
+        <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="lineage" id="tab-lineage">
+          <span>血缘档案</span>
+          <span class="tab-badge mono" id="badge-lineage">0</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="main">
+      <!-- ==================== TAB 1: SURGERY ==================== -->
+      <section id="panel-surgery" class="panel active" role="tabpanel" aria-labelledby="tab-surgery">
+        <!-- Initial Skeleton -->
+        <div id="surgery-loading" class="skeleton-wrap">
+          <div class="skel skel-card"></div>
+          <div class="skel skel-bar"></div>
+          <div class="skel skel-turn"></div>
+          <div class="skel skel-turn"></div>
+          <p class="skeleton-caption">正在载入会话上下文与项目索引…</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="surgery-empty" class="empty-state hidden">
+          <div class="empty-icon" aria-hidden="true">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+              <path d="M8 10h8M8 14h5"></path>
+            </svg>
+          </div>
+          <h2 class="empty-title">暂无载入手术台的会话</h2>
+          <p class="empty-desc" id="surgery-empty-desc">你可以刷新索引自动关联当前会话，或前往「会话雷达」挑选任意历史对话进行上下文裁剪与接力。</p>
+          <div class="empty-actions">
+            <button id="btn-empty-sync" class="btn btn-primary" type="button">刷新索引</button>
+            <button id="btn-empty-radar" class="btn btn-ghost" type="button">打开会话雷达</button>
+          </div>
+        </div>
+
+        <!-- Active Surgery Console -->
+        <div id="surgery-layout" class="surgery-layout hidden">
+          <div class="surgery-main">
+            <!-- Health Dashboard Card -->
+            <section class="card health-card" id="health-card" aria-label="会话健康仪表">
+              <div class="health-head">
+                <div class="health-title-wrap">
+                  <h1 class="health-title" id="health-title" title="">—</h1>
+                  <div class="health-meta">
+                    <span class="meta-path mono" id="health-path" title="">—</span>
+                    <span class="pill pill-model mono" id="health-model">—</span>
+                  </div>
+                </div>
+                <button id="btn-open-host" class="btn btn-xs btn-ghost hidden" type="button" title="在 Antigravity 主壳切换至该会话">
+                  在主壳打开
+                </button>
+              </div>
+
+              <!-- Context Waterline Bar -->
+              <div class="waterline" id="waterline">
+                <div class="waterline-row">
+                  <span class="waterline-label">上下文峰值水位</span>
+                  <div class="waterline-values">
+                    <span class="waterline-num mono" id="waterline-tokens">0</span>
+                    <span class="pill pill-status" id="waterline-status">健康</span>
+                    <span class="waterline-turns mono" id="waterline-turns">0 轮</span>
+                  </div>
+                </div>
+                <div class="progress-track" aria-hidden="true">
+                  <div class="progress-fill" id="waterline-fill" style="width: 0%;"></div>
+                </div>
+              </div>
+
+              <!-- Compact Git Anchor Row -->
+              <div class="git-bar hidden" id="git-anchor-bar" title="">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="6" y1="3" x2="6" y2="15"></line>
+                  <circle cx="18" cy="6" r="3"></circle>
+                  <circle cx="6" cy="18" r="3"></circle>
+                  <path d="M18 9a9 9 0 0 1-9 9"></path>
+                </svg>
+                <span class="git-ref mono" id="git-ref">main @ —</span>
+                <span class="pill pill-git" id="git-dirty">工作区干净</span>
+              </div>
+            </section>
+
+            <!-- Preset & Switch Toolbar -->
+            <section class="card toolbar-card" aria-label="一键手术预设">
+              <div class="preset-group" role="group" aria-label="裁剪预设">
+                <button class="preset-btn active" type="button" data-preset="smart-clean" title="自动剔除超长日志与低价值噪声，保留核心变更与错误诊断">智能去噪</button>
+                <button class="preset-btn" type="button" data-preset="backbone" title="仅保留对话主干与核心代码修改，最大限度压缩体积">仅留主干</button>
+                <button class="preset-btn" type="button" data-preset="all" title="全选所有轮次与工具步骤">全选</button>
+                <button class="preset-btn" type="button" data-preset="none" title="清空当前勾选，从零挑选">清空</button>
+              </div>
+
+              <div class="switch-group" role="group" aria-label="交接包内容选项">
+                <label class="toggle-chip" title="包含每轮助手可见回复">
+                  <input type="checkbox" id="opt-assistant" checked />
+                  <span>AI 回复</span>
+                </label>
+                <label class="toggle-chip" title="包含勾选的工具调用参数与输出摘要">
+                  <input type="checkbox" id="opt-tools" checked />
+                  <span>工具明细</span>
+                </label>
+                <label class="toggle-chip" title="附带当前仓库 Git 分支、SHA 与变更状态">
+                  <input type="checkbox" id="opt-git" checked />
+                  <span>Git 锚点</span>
+                </label>
+                <label class="toggle-chip" title="自动识别并脱敏 Token、API Key、私钥等敏感信息">
+                  <input type="checkbox" id="opt-redact" checked />
+                  <span>敏感脱敏</span>
+                </label>
+              </div>
+            </section>
+
+            <!-- Touched Files Collapsible Card -->
+            <section class="card files-card hidden" id="files-section" aria-label="触碰文件速览">
+              <div class="files-head">
+                <button id="btn-toggle-files" class="files-toggle" type="button" aria-expanded="false">
+                  <svg class="chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                  </svg>
+                  <span class="files-title">触碰文件</span>
+                  <span class="pill pill-edit mono" id="files-mod-count">已修改 0</span>
+                  <span class="pill pill-read mono" id="files-read-count">已读取 0</span>
+                </button>
+                <label class="mini-check" title="在交接包中附带触碰文件清单">
+                  <input type="checkbox" id="opt-files" checked />
+                  <span>附入清单</span>
+                </label>
+              </div>
+              <div id="files-body" class="files-body hidden">
+                <div id="files-pills" class="files-pills"></div>
+              </div>
+            </section>
+
+            <!-- Turn List Header -->
+            <div class="section-bar">
+              <span class="section-title">逐轮手术台</span>
+              <span class="section-stat mono" id="turn-selection-stat">已选 0/0 轮 · 0 步</span>
+            </div>
+
+            <!-- Turn-by-Turn Interactive List -->
+            <div id="turn-list" class="turn-list" role="list"></div>
+          </div>
+
+          <!-- Sticky Launchpad (Bottom Sticky on <1040px, Right Rail on >=1040px) -->
+          <aside class="launchpad" id="launchpad" aria-label="接力发射台">
+            <!-- Live Telemetry Strip -->
+            <div class="lp-telemetry" id="lp-telemetry">
+              <div class="lp-metric-main">
+                <span class="lp-pulse hidden" id="lp-spinner" aria-hidden="true"></span>
+                <span class="lp-slim-text mono" id="lp-slim-text">原峰值 — → 裁剪后 —</span>
+                <span class="pill pill-saved mono hidden" id="lp-saved-badge">减负 0%</span>
+              </div>
+              <div class="lp-metric-tags">
+                <span class="pill pill-redact mono hidden" id="lp-redact-badge" title="已自动脱敏敏感片段">脱敏 0</span>
+                <span class="pill pill-mode mono" id="lp-mode-badge" title="交接包传输方式">—</span>
+              </div>
+            </div>
+
+            <!-- Collapsible Config Toggle (shown on narrow viewports) -->
+            <button id="btn-toggle-lp-config" class="lp-config-toggle" type="button" aria-expanded="false">
+              <span class="lp-toggle-left">
+                <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                <span>发射配置</span>
+              </span>
+              <span class="lp-toggle-summary mono" id="lp-config-summary">展开设置目标目录与指令</span>
+            </button>
+
+            <!-- Configuration Fields -->
+            <div class="lp-config-body" id="lp-config-body">
+              <div class="field">
+                <label class="field-label" for="lp-project">目标项目目录</label>
+                <select id="lp-project" class="input select"></select>
+                <p class="field-hint">未列出目标目录？请先在左侧 Projects 打开过一次后再点刷新</p>
+              </div>
+
+              <div class="field-grid">
+                <div class="field">
+                  <label class="field-label" for="lp-model">模型</label>
+                  <input id="lp-model" class="input mono" type="text" list="model-options" placeholder="pro" autocomplete="off" />
+                  <datalist id="model-options">
+                    <option value="pro"></option>
+                    <option value="flash"></option>
+                    <option value="flash_lite"></option>
+                  </datalist>
+                </div>
+
+                <div class="field">
+                  <label class="field-label" for="lp-title">新会话标题</label>
+                  <input id="lp-title" class="input" type="text" placeholder="[Relay] 新会话标题" />
+                </div>
+              </div>
+
+              <div class="field">
+                <label class="field-label" for="lp-instruction">续接附加指令（可选）</label>
+                <textarea id="lp-instruction" class="input textarea" rows="2" placeholder="例如：接手后先不要改代码，直接排查第 3 步的报错原因"></textarea>
+              </div>
+            </div>
+
+            <!-- Standalone Web / Agent API Hint -->
+            <div id="lp-web-hint" class="lp-notice hidden">
+              独立 Web 模式不支持一键拉起宿主会话，请直接复制交接包或导出 MD。
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="lp-actions">
+              <button id="btn-launch" class="btn btn-primary btn-launch" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M5 12h14"></path>
+                  <path d="m12 5 7 7-7 7"></path>
+                </svg>
+                <span>启动新会话并跳转</span>
+              </button>
+              <div class="lp-secondary-row">
+                <button id="btn-copy" class="btn btn-secondary" type="button">复制交接包</button>
+                <button id="btn-preview" class="btn btn-ghost" type="button">预览</button>
+                <button id="btn-export" class="btn btn-ghost" type="button">导出 MD</button>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: SESSIONS RADAR ==================== -->
+      <section id="panel-sessions" class="panel" role="tabpanel" aria-labelledby="tab-sessions">
+        <div class="radar-toolbar card">
+          <div class="search-wrap">
+            <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.3-4.3"></path>
+            </svg>
+            <input id="radar-search" class="input search-input" type="search" placeholder="搜索标题、正文、文件路径…" autocomplete="off" />
+            <button id="btn-clear-search" class="search-clear hidden" type="button" aria-label="清除搜索">×</button>
+          </div>
+
+          <div class="radar-filters">
+            <select id="radar-project" class="input select" aria-label="按项目筛选">
+              <option value="">全部项目</option>
+            </select>
+            <select id="radar-model" class="input select mono" aria-label="按模型筛选">
+              <option value="">全部模型</option>
+            </select>
+            <label class="mini-check radar-subagent">
+              <input type="checkbox" id="radar-hide-subagents" checked />
+              <span>隐藏子代理</span>
+            </label>
+          </div>
+
+          <div class="radar-status">
+            <span id="radar-count" class="mono">共 0 条会话</span>
+            <button id="btn-reset-filters" class="link-btn hidden" type="button">重置筛选</button>
+          </div>
+        </div>
+
+        <div id="sessions-list" class="sessions-list" role="list"></div>
+      </section>
+
+      <!-- ==================== TAB 3: LINEAGE & ARCHIVES ==================== -->
+      <section id="panel-lineage" class="panel" role="tabpanel" aria-labelledby="tab-lineage">
+        <div class="lineage-grid">
+          <section class="lineage-section">
+            <div class="section-bar">
+              <span class="section-title">手术交接血缘流</span>
+              <span class="section-stat mono" id="lineage-count">0 条记录</span>
+            </div>
+            <div id="lineage-list" class="lineage-list"></div>
+          </section>
+
+          <section class="archives-section">
+            <div class="section-bar">
+              <span class="section-title">已导出交接包档案（<code class="mono section-code">handoffs/*.md</code>）</span>
+              <span class="section-stat mono" id="archives-count">0 份档案</span>
+            </div>
+            <div id="archives-list" class="archives-list"></div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Global Markdown Preview Modal -->
+  <div id="preview-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-dialog">
+      <div class="modal-head">
+        <div class="modal-head-info">
+          <h2 class="modal-title" id="modal-title">交接包预览</h2>
+          <div class="modal-badges mono" id="modal-badges"></div>
+        </div>
+        <div class="modal-head-actions">
+          <label class="mini-check" title="开启或关闭代码区自动换行">
+            <input type="checkbox" id="modal-wrap" checked />
+            <span>换行</span>
+          </label>
+          <button id="btn-modal-close" class="icon-btn" type="button" aria-label="关闭预览" title="关闭 (Esc)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6 6 18M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="modal-body">
+        <pre class="modal-pre wrap" id="modal-pre"><code id="modal-code"></code></pre>
+      </div>
+
+      <div class="modal-foot">
+        <span class="modal-filepath mono" id="modal-filepath" title=""></span>
+        <div class="modal-foot-btns">
+          <button id="btn-modal-copy" class="btn btn-primary" type="button">复制 Markdown</button>
+          <button id="btn-modal-done" class="btn btn-ghost" type="button">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="./app.js" defer></script>
+</body>
+</html>
