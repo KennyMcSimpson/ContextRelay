@@ -416,10 +416,10 @@ describe('hooks/nudge.mjs end-to-end 0-token watermark tests', () => {
     assert.ok(
       tier2Md.length > 0 &&
         tier2Md.includes('215k') &&
-        tier2Md.includes('高水位预警') &&
+        tier2Md.includes('high-watermark alert') &&
         tier2Md.includes('/fork') &&
         tier2Md.includes('/compact'),
-      `expected Tier 2 nudge to include 215k, 高水位预警, /fork, and /compact, got: ${tier2Md}`,
+      `expected Tier 2 nudge to include 215k, high-watermark alert, /fork, and /compact, got: ${tier2Md}`,
     );
 
     const tier2Repeat = runNudge(JSON.stringify({ conversationId: highConvId }));
@@ -449,7 +449,7 @@ describe('hooks/sync-turn.mjs end-to-end tests', () => {
           type: 'USER_INPUT',
           status: 'DONE',
           created_at: '2026-11-24T13:00:00.000Z',
-          content: '<USER_REQUEST>验证 Stop hook 增量同步落盘</USER_REQUEST>',
+          content: '<USER_REQUEST>Verify Stop hook incremental sync persistence</USER_REQUEST>',
         }),
         JSON.stringify({
           step_index: 1,
@@ -460,7 +460,7 @@ describe('hooks/sync-turn.mjs end-to-end tests', () => {
           model: 'gemini-2.5-pro',
           input_tokens: 2000,
           output_tokens: 100,
-          content: '同步测试响应。',
+          content: 'Sync test response completed.',
         }),
       ].join('\n') + '\n',
       'utf8',
@@ -523,7 +523,7 @@ describe('sidecars/relay/main.mjs headless warmup smoke test', () => {
           type: 'USER_INPUT',
           status: 'DONE',
           created_at: '2026-11-24T15:10:00.000Z',
-          content: '<USER_REQUEST>无头预热冒烟测试</USER_REQUEST>',
+          content: '<USER_REQUEST>Headless warmup smoke test</USER_REQUEST>',
         }),
         JSON.stringify({
           step_index: 1,
@@ -534,7 +534,7 @@ describe('sidecars/relay/main.mjs headless warmup smoke test', () => {
           model: 'gemini-2.5-pro',
           input_tokens: 4000,
           output_tokens: 150,
-          content: '预热索引记录生成成功。',
+          content: 'Warmup index entry created successfully.',
         }),
       ].join('\n') + '\n',
       'utf8',
@@ -577,7 +577,7 @@ describe('core/git-anchor.mjs unit tests', () => {
       stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    fs.writeFileSync(path.join(repoDir, '中文说明.txt'), '中文内容测试\n', 'utf8');
+    fs.writeFileSync(path.join(repoDir, '中文说明.txt'), 'UTF-8 non-ASCII filename test\n', 'utf8');
     fs.writeFileSync(path.join(repoDir, 'staged.txt'), 'initial staged content\n', 'utf8');
     execFileSync('git', ['add', 'staged.txt'], {
       cwd: repoDir,
@@ -800,7 +800,7 @@ describe('CLI relay subcommand end-to-end tests: bin/context-relay.mjs relay', (
           type: 'USER_INPUT',
           status: 'DONE',
           created_at: '2026-11-24T15:20:00.000Z',
-          content: '<USER_REQUEST>重构支付网关并准备跨项目接力</USER_REQUEST>',
+          content: '<USER_REQUEST>Refactor payment gateway and prepare cross-project relay</USER_REQUEST>',
         }),
         JSON.stringify({
           step_index: 1,
@@ -812,7 +812,7 @@ describe('CLI relay subcommand end-to-end tests: bin/context-relay.mjs relay', (
           input_tokens: 68_000,
           cache_read_tokens: 12_000,
           output_tokens: 420,
-          content: `已完成支付网关核心重构，调试密钥 API_KEY=${secretApiKey} 与 ${secretGhp} 必须脱敏。`,
+          content: `Completed payment gateway refactor; debug secrets API_KEY=${secretApiKey} and ${secretGhp} must be redacted.`,
           tool_calls: [
             { name: 'edit_file', arguments: { Path: 'E:/demo/alpha-service/src/pay.mjs' } },
           ],
@@ -914,7 +914,7 @@ describe('CLI relay subcommand end-to-end tests: bin/context-relay.mjs relay', (
       '--export-only',
       '--no-git',
       '--note',
-      '接力后先跑全量回归',
+      'Run full regression suite after relay',
       '--json',
     ]);
     assert.equal(exportGoRes.status, 0, `relay --go --export-only failed: ${exportGoRes.stderr || exportGoRes.stdout}`);
@@ -931,7 +931,7 @@ describe('CLI relay subcommand end-to-end tests: bin/context-relay.mjs relay', (
     assert.ok(!handoffText.includes(secretApiKey), 'exported relay handoff must redact API_KEY');
     assert.ok(!handoffText.includes(secretGhp), 'exported relay handoff must redact ghp_ token');
     assert.ok(handoffText.includes('[REDACTED:'), 'exported relay handoff must contain [REDACTED:...] markers');
-    assert.ok(handoffText.includes('接力后先跑全量回归'));
+    assert.ok(handoffText.includes('Run full regression suite after relay'));
 
     // 4. relay --go --to nonexistent_xyz --json exits non-zero
     const badTargetGoRes = runRelay(['--session', convId, '--go', '--to', 'nonexistent_xyz', '--no-git', '--json']);
@@ -1196,7 +1196,7 @@ describe('CLI installer & boundary tests: bin/context-relay.mjs', () => {
           type: 'USER_INPUT',
           status: 'DONE',
           created_at: '2026-11-24T14:00:00.000Z',
-          content: '<USER_REQUEST>CLI 冒烟验证 uniqueCliToken8844</USER_REQUEST>',
+          content: '<USER_REQUEST>CLI smoke test uniqueCliToken8844</USER_REQUEST>',
         }),
         JSON.stringify({
           step_index: 1,
@@ -1207,7 +1207,7 @@ describe('CLI installer & boundary tests: bin/context-relay.mjs', () => {
           model: 'gemini-2.5-pro',
           input_tokens: 6000,
           output_tokens: 200,
-          content: 'CLI 冒烟回复完成，附测试密钥 API_KEY=real_secret_value_123456。',
+          content: 'CLI smoke test reply completed with test secret API_KEY=real_secret_value_123456.',
         }),
       ].join('\n') + '\n',
       'utf8',

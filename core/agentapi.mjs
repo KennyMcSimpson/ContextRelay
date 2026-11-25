@@ -145,8 +145,8 @@ function extractConversationId(raw, stdoutText) {
 }
 
 /**
- * 只读解析 Antigravity agentapi shim 包装脚本，提取指向的真实原生二进制路径。
- * 绝不执行 shim 脚本本身。
+ * Read-only parser for Antigravity agentapi shim scripts to extract the real native binary path.
+ * Never executes the shim script itself.
  */
 export function extractBinaryFromShim(content, platform = process.platform) {
   if (typeof content !== 'string') return '';
@@ -206,8 +206,8 @@ export function extractBinaryFromShim(content, platform = process.platform) {
 }
 
 /**
- * 解析可用的 Antigravity AgentAPI 原生二进制路径。
- * 绝不通过 shell: true 调用 .bat/.cmd/.sh 包装脚本，彻底避免命令注入。
+ * Resolve an available native Antigravity AgentAPI executable path.
+ * Never invokes `.bat`/`.cmd`/`.sh` wrapper scripts via `shell: true`, preventing command injection.
  */
 export function resolveAgentApiExecutable(options = {}) {
   const env = options.env || process.env;
@@ -242,22 +242,22 @@ export function resolveAgentApiExecutable(options = {}) {
     return { available: true, file: trimmed, prefixArgs };
   };
 
-  // 允许测试或调用方显式注入二进制路径
+  // Allow tests or callers to explicitly inject a binary path
   if (options.file || options.executable) {
     const customPrefix = Array.isArray(options.prefixArgs) ? options.prefixArgs : ['agentapi'];
     const explicit = tryCandidate(options.file || options.executable, { prefixArgs: customPrefix });
     if (explicit) return explicit;
   }
 
-  // 1. 优先使用 Antigravity Sidecar 自动注入的真实二进制路径
+  // 1. Prefer the real binary path injected by Antigravity Sidecar
   const sidecarExe = tryCandidate(env?.ANTIGRAVITY_AGENTAPI_EXE);
   if (sidecarExe) return sidecarExe;
 
-  // 2. 其次检查 ANTIGRAVITY_EXECUTABLE
+  // 2. Fallback to ANTIGRAVITY_EXECUTABLE
   const envExe = tryCandidate(env?.ANTIGRAVITY_EXECUTABLE);
   if (envExe) return envExe;
 
-  // 3. 只读解析 agentapi shim 脚本提取真实二进制路径（零执行）
+  // 3. Read-only parse of the agentapi shim script to extract the native binary path (zero execution)
   const binDir = join(home, '.gemini', 'antigravity', 'bin');
   const shimPath =
     platform === 'win32' ? join(binDir, 'agentapi.bat') : join(binDir, 'agentapi');
@@ -280,10 +280,10 @@ export function resolveAgentApiExecutable(options = {}) {
       }
     }
   } catch {
-    // shim 不可读或解析异常时安全回退
+    // Safely fall back if the shim is unreadable or fails to parse
   }
 
-  // 4. 平台标准安装目录与旧版路径兜底（绝不硬编码个人用户名）
+  // 4. Platform-standard installation directories and legacy fallbacks (no hardcoded personal usernames)
   const fallbackCandidates = [];
   if (platform === 'win32') {
     const localAppData = safeTrimmedString(env?.LOCALAPPDATA);
@@ -310,7 +310,7 @@ export function resolveAgentApiExecutable(options = {}) {
     if (resolved) return resolved;
   }
 
-  // 5. 均不可用时静默降级返回不可用原因
+  // 5. Silently degrade when unavailable and return the reason
   return {
     available: false,
     reason: DEFAULT_UNAVAILABLE_REASON,
@@ -318,7 +318,7 @@ export function resolveAgentApiExecutable(options = {}) {
 }
 
 /**
- * 从 `agentapi get-conversation-metadata` 响应 JSON 中规范化提取元数据。
+ * Normalize and extract metadata from the JSON output of `agentapi get-conversation-metadata`.
  */
 export function parseMetadataPayload(raw) {
   const payload = typeof raw === 'string' ? parseJsonLenient(raw) : raw;
@@ -445,7 +445,7 @@ export function parseMetadataPayload(raw) {
 }
 
 /**
- * 创建可注入依赖的 AgentAPI 客户端。
+ * Create an AgentAPI client with injectable dependencies.
  */
 export function createAgentApiClient(overrides = {}) {
   const runExecFileSync =
@@ -571,7 +571,7 @@ export function createAgentApiClient(overrides = {}) {
       args.push(`--profile=${cleanProfile}`);
     }
 
-    // 若 prompt 以 '-' 开头，前置换行避免被 CLI 参数解析器误判为 flag
+    // Prepend a newline if prompt starts with '-' so CLI parsers never treat it as a flag
     const safePrompt = prompt.startsWith('-') ? `\n${prompt}` : prompt;
     args.push(safePrompt);
 

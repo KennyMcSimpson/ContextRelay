@@ -7,7 +7,10 @@ All notable changes to **Context Relay** are documented in this file.
 ### Added
 - **Live Sidebar Renamed Title Sync**: Added a linear `O(N)` protobuf text-format parser (`parseAnnotationPbtxtTitle`) and read-only reader (`readAnnotationForTranscript`) for Antigravity's `<appDataDir>/annotations/<sessionId>.pbtxt` (zero `.sqlite` access, symlink-safe, path-bounded).
 - **Sub-Millisecond Rename Hot-Refresh**: `store.syncAll()` and `store.syncSingle()` detect `.pbtxt` changes even when `transcript.jsonl` is untouched, updating titles and full-text search indexes immediately and restoring the original transcript title if a custom title is cleared.
-- **GitHub Visual Showcase & CI**: Added bilingual README (`README.md` + `README.zh-CN.md`), native zero-UI workflow preview SVG (`assets/workflow-preview.svg`), `CHANGELOG.md`, MIT `LICENSE`, and GitHub Actions CI (`node --test` on Ubuntu & Windows, Node 22 & 24).
+- **GitHub Visual Showcase & CI**: Added polished English `README.md`, native zero-UI workflow preview SVG (`assets/workflow-preview.svg`), `CHANGELOG.md`, MIT `LICENSE`, and GitHub Actions CI (`node --test` on Ubuntu & Windows, Node 22 & 24).
+
+### Changed
+- **Full English Standardization**: Standardized all documentation, UI copy, CLI output, handoff templates, skills, plugin metadata, and code comments to English.
 
 ### Fixed
 - `/fork` now inherits the exact live sidebar title you renamed (e.g. `Auth Refactor` → `Auth Refactor (fork)` → `Auth Refactor (fork #2)`) instead of falling back to the truncated first user prompt.

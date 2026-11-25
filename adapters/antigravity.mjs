@@ -147,8 +147,10 @@ function skipPbtxtWsAndComments(raw, startIndex) {
 }
 
 /**
- * 解析 Antigravity 纯文本注解文件（<appDataDir>/annotations/<sessionId>.pbtxt）中的顶层 title 字段。
- * 线性 O(N) 单遍扫描：忽略注释、嵌套消息块及其他字符串字面量，完整解码八进制/十六进制/Unicode 转义。
+ * Parse the top-level `title` field from Antigravity's plain-text annotation file
+ * (`<appDataDir>/annotations/<sessionId>.pbtxt`).
+ * Linear O(N) single-pass scan: ignores comments, nested message blocks, and other string
+ * literals, while decoding octal, hexadecimal, and Unicode escapes.
  */
 export function parseAnnotationPbtxtTitle(raw) {
   if (typeof raw !== 'string' || !raw) return '';
@@ -227,8 +229,9 @@ export function parseAnnotationPbtxtTitle(raw) {
 }
 
 /**
- * 按 transcript 路径定位并只读提取 Antigravity 侧边栏当前重命名标题（<appDataDir>/annotations/<sessionId>.pbtxt）。
- * 绝不触碰任何 .sqlite / .db 数据库，严格校验路径边界与非软链。
+ * Locate and read-only extract Antigravity's live renamed sidebar title from
+ * `<appDataDir>/annotations/<sessionId>.pbtxt` given a transcript path.
+ * Never touches any `.sqlite` / `.db` database; strictly enforces path boundaries and rejects symlinks.
  */
 export function readAnnotationForTranscript(filePath, sessionId, { statOnly = false } = {}) {
   if (typeof filePath !== 'string' || !filePath.trim()) return EMPTY_ANNOTATION;

@@ -673,7 +673,7 @@ export function createApiController({
         ok: false,
         status: 400,
         error:
-          '当前运行在独立 Web 模式或未检测到 Antigravity agentapi，请使用「复制」或「导出」功能，或在 Antigravity 侧栏内启动。',
+          'Antigravity agentapi is unavailable in standalone web mode. Use Copy or Export MD, or launch inside the Antigravity sidebar.',
       };
     }
 

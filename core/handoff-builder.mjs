@@ -95,7 +95,7 @@ function preserveHeadTailUtf8(text, maxBytes = MAX_SINGLE_BLOCK_BYTES) {
   const totalBytes = Buffer.byteLength(text, 'utf-8');
   if (totalBytes <= maxBytes) return text;
 
-  const placeholderMarker = `\n\n... [内容过长，中间已省略约 ${totalBytes} 字节，保留首尾上下文] ...\n\n`;
+  const placeholderMarker = `\n\n... [content truncated: ~${totalBytes} bytes omitted from middle, head and tail preserved] ...\n\n`;
   const markerReserve = Buffer.byteLength(placeholderMarker, 'utf-8') + 16;
   const available = Math.max(64, maxBytes - markerReserve);
   const headBudget = Math.floor(available * 0.55);
@@ -107,7 +107,7 @@ function preserveHeadTailUtf8(text, maxBytes = MAX_SINGLE_BLOCK_BYTES) {
     0,
     totalBytes - Buffer.byteLength(head, 'utf-8') - Buffer.byteLength(tail, 'utf-8'),
   );
-  const marker = `\n\n... [内容过长，中间已省略约 ${omitted} 字节，保留首尾上下文] ...\n\n`;
+  const marker = `\n\n... [content truncated: ~${omitted} bytes omitted from middle, head and tail preserved] ...\n\n`;
   const combined = `${head}${marker}${tail}`;
   if (Buffer.byteLength(combined, 'utf-8') <= maxBytes) {
     return combined;
@@ -146,20 +146,20 @@ function normalizePathKey(p) {
 }
 
 function categoryBadge(item) {
-  if (item.isError) return '失败';
+  if (item.isError) return 'ERROR';
   switch (item.category) {
     case 'write':
-      return '写入';
+      return 'WRITE';
     case 'read':
-      return '读取';
+      return 'READ';
     case 'command':
-      return '命令';
+      return 'CMD';
     case 'search':
-      return '检索';
+      return 'SEARCH';
     case 'meta':
-      return '元操作';
+      return 'META';
     default:
-      return '工具';
+      return 'TOOL';
   }
 }
 
@@ -271,32 +271,32 @@ export function buildHandoffBundle(parsedSession, options = {}) {
   const sections = [];
 
   // 1. Header
-  const title = truncateText(session.title || '未命名会话', 120) || '未命名会话';
-  const sessionId = session.sessionId || '未知';
-  const primaryModel = session.lastModel || session.firstModel || '未知';
+  const title = truncateText(session.title || 'Untitled session', 120) || 'Untitled session';
+  const sessionId = session.sessionId || 'unknown';
+  const primaryModel = session.lastModel || session.firstModel || 'unknown';
   const allModels =
     Array.isArray(session.modelsUsed) && session.modelsUsed.length > 0
       ? session.modelsUsed.join(', ')
       : primaryModel;
   const modelLine =
     allModels && allModels !== primaryModel
-      ? `${primaryModel}（历史使用：${allModels}）`
+      ? `${primaryModel} (previously used: ${allModels})`
       : primaryModel;
-  const effectiveWorkspace = targetWorkspace || session.workspacePath || '未指定';
+  const effectiveWorkspace = targetWorkspace || session.workspacePath || 'unspecified';
   const generatedAt = new Date().toISOString();
 
   const headerLines = [
-    '# ContextRelay 上下文交接包',
+    '# Context Relay Handoff Bundle',
     '',
-    `- **源会话标题**：${title}`,
-    `- **源会话 ID**：\`${sessionId}\``,
-    `- **源模型**：${modelLine}`,
-    `- **目标目录**：\`${effectiveWorkspace}\``,
-    `- **生成时间**：${generatedAt}`,
-    `- **裁剪统计**：保留 ${selectedTurnsCount}/${totalTurnsCount} 轮对话，保留 ${selectedItemsCount}/${totalItemsCount} 条工具步骤`,
+    `- **Source Title**: ${title}`,
+    `- **Source Session ID**: \`${sessionId}\``,
+    `- **Source Model**: ${modelLine}`,
+    `- **Target Workspace**: \`${effectiveWorkspace}\``,
+    `- **Generated At**: ${generatedAt}`,
+    `- **Pruning Summary**: kept ${selectedTurnsCount}/${totalTurnsCount} turns, ${selectedItemsCount}/${totalItemsCount} tool steps`,
   ];
   if (session.isSubagent && session.parentSessionId) {
-    headerLines.splice(4, 0, `- **源父会话 ID**：\`${session.parentSessionId}\`（子代理会话）`);
+    headerLines.splice(4, 0, `- **Parent Session ID**: \`${session.parentSessionId}\` (subagent session)`);
   }
   sections.push(headerLines.join('\n'));
 
@@ -304,24 +304,24 @@ export function buildHandoffBundle(parsedSession, options = {}) {
   const trimmedInstruction =
     typeof extraInstruction === 'string' ? extraInstruction.trim() : '';
   if (trimmedInstruction) {
-    sections.push(`## 本次续接明确指令\n\n${trimmedInstruction}`);
+    sections.push(`## Explicit Continuation Instruction\n\n${trimmedInstruction}`);
   }
 
   // 3. Deterministic Git anchor
   if (gitAnchor && gitAnchor.isGitRepo) {
     const anchorDir = gitAnchor.workspacePath || gitAnchor.repoRoot || '';
     const gitLines = [
-      '## 当前仓库真实状态锚点（确定性采集）',
+      '## Live Repository State Anchor (Deterministic)',
       '',
-      `- **采集目录**：\`${anchorDir}\``,
-      `- **仓库根目录**：\`${gitAnchor.repoRoot || ''}\``,
-      `- **当前分支**：\`${gitAnchor.branch || '(detached/unborn)'}\``,
-      `- **最新提交**：\`${gitAnchor.headSha || '无提交'}\`${
+      `- **Captured From**: \`${anchorDir}\``,
+      `- **Repository Root**: \`${gitAnchor.repoRoot || ''}\``,
+      `- **Current Branch**: \`${gitAnchor.branch || '(detached/unborn)'}\``,
+      `- **HEAD Commit**: \`${gitAnchor.headSha || 'no commits'}\`${
         gitAnchor.headSubject ? ` — ${gitAnchor.headSubject}` : ''
       }`,
-      `- **工作区变更统计**：已跟踪变更 ${gitAnchor.dirtyCount ?? 0} 项，未跟踪文件 ${
+      `- **Working Tree**: ${gitAnchor.dirtyCount ?? 0} modified tracked, ${
         gitAnchor.untrackedCount ?? 0
-      } 项`,
+      } untracked`,
     ];
 
     const trimmedTargetWs = typeof targetWorkspace === 'string' ? targetWorkspace.trim() : '';
@@ -334,7 +334,7 @@ export function buildHandoffBundle(parsedSession, options = {}) {
         (repoKey && (targetKey === repoKey || targetKey.startsWith(`${repoKey}/`)));
       if (targetKey && !insideAnchorRepo) {
         gitLines.push(
-          `- **跨项目提示**：上述 Git 状态采集自 \`${anchorDir}\`，与目标目录 \`${trimmedTargetWs}\` 不同，请勿混淆两个目录的仓库状态`,
+          `- **Cross-Project Note**: Git state above was captured from \`${anchorDir}\`, which differs from target workspace \`${trimmedTargetWs}\`. Do not conflate the two repositories.`,
         );
       }
     }
@@ -346,7 +346,7 @@ export function buildHandoffBundle(parsedSession, options = {}) {
       gitLines.push('', '### git diff --stat', '', safeCodeFence(gitAnchor.diffStat, 'text'));
     }
     if (gitAnchor.diffSnippet) {
-      gitLines.push('', '### git diff 片段', '', safeCodeFence(gitAnchor.diffSnippet, 'diff'));
+      gitLines.push('', '### git diff snippet', '', safeCodeFence(gitAnchor.diffSnippet, 'diff'));
     }
 
     sections.push(gitLines.join('\n'));
@@ -361,24 +361,24 @@ export function buildHandoffBundle(parsedSession, options = {}) {
     const modifiedKeys = new Set(modified.map(normalizePathKey));
     const readOnly = read.filter((p) => !modifiedKeys.has(normalizePathKey(p)));
 
-    const fileLines = ['## 会话触碰文件清单'];
+    const fileLines = ['## Files Touched in Session'];
     if (modified.length === 0 && readOnly.length === 0) {
-      fileLines.push('', '- （本会话未记录文件修改或读取）');
+      fileLines.push('', '- (No file reads or modifications recorded in this session)');
     } else {
       if (modified.length > 0) {
-        fileLines.push('', `### 修改 / 新建文件（${modified.length}）`, '');
+        fileLines.push('', `### Modified / Created (${modified.length})`, '');
         for (const f of modified) {
           fileLines.push(`- \`${f}\``);
         }
       }
       if (readOnly.length > 0) {
-        fileLines.push('', `### 关键读取文件（${readOnly.length}）`, '');
+        fileLines.push('', `### Key Files Read (${readOnly.length})`, '');
         const displayRead = readOnly.slice(0, MAX_READ_FILES_DISPLAY);
         for (const f of displayRead) {
           fileLines.push(`- \`${f}\``);
         }
         if (readOnly.length > MAX_READ_FILES_DISPLAY) {
-          fileLines.push(`- ... 另有 ${readOnly.length - MAX_READ_FILES_DISPLAY} 个已读文件已省略`);
+          fileLines.push(`- ... ${readOnly.length - MAX_READ_FILES_DISPLAY} additional read files omitted`);
         }
       }
     }
@@ -386,12 +386,12 @@ export function buildHandoffBundle(parsedSession, options = {}) {
   }
 
   // 5. Selected conversation backbone
-  const backboneLines = ['## 精选对话脉络（已外科剪枝）'];
+  const backboneLines = ['## Curated Conversation Backbone (Surgically Pruned)'];
 
   if (selectedTurns.length === 0) {
     backboneLines.push(
       '',
-      '（未保留历史对话轮次，请直接依据上方续接指令与仓库状态锚点开展工作。）',
+      '(No prior conversation turns kept. Proceed directly using the continuation instruction and Git state anchor above.)',
     );
   } else {
     let prevIndex = 0;
@@ -402,31 +402,31 @@ export function buildHandoffBundle(parsedSession, options = {}) {
         backboneLines.push(
           '',
           gapStart === gapEnd
-            ? `> _（已剪除第 ${gapStart} 轮对话）_`
-            : `> _（已剪除第 ${gapStart}–${gapEnd} 轮对话）_`,
+            ? `> _(Pruned turn ${gapStart})_`
+            : `> _(Pruned turns ${gapStart}–${gapEnd})_`,
         );
       }
       prevIndex = turn.index;
 
-      const roleTag = turn.sourceType === 'SYSTEM_MESSAGE' ? '（子代理任务）' : '';
-      backboneLines.push('', `### 第 ${turn.index} 轮${roleTag}`);
+      const roleTag = turn.sourceType === 'SYSTEM_MESSAGE' ? ' (subagent task)' : '';
+      backboneLines.push('', `### Turn ${turn.index}${roleTag}`);
 
       const metaParts = [];
-      if (turn.model) metaParts.push(`模型：${turn.model}`);
-      if (turn.createdAt) metaParts.push(`时间：${turn.createdAt}`);
+      if (turn.model) metaParts.push(`Model: ${turn.model}`);
+      if (turn.createdAt) metaParts.push(`Time: ${turn.createdAt}`);
       if (Array.isArray(turn.filesModified) && turn.filesModified.length > 0) {
-        metaParts.push(`修改文件：${turn.filesModified.length} 个`);
+        metaParts.push(`Modified files: ${turn.filesModified.length}`);
       }
       if (metaParts.length > 0) {
         backboneLines.push(`_${metaParts.join(' · ')}_`);
       }
 
-      const cleanUser = preserveHeadTailUtf8(turn.userText || '（空）', MAX_SINGLE_BLOCK_BYTES);
-      backboneLines.push('', '#### 用户请求', '', cleanUser);
+      const cleanUser = preserveHeadTailUtf8(turn.userText || '(empty)', MAX_SINGLE_BLOCK_BYTES);
+      backboneLines.push('', '#### User Request', '', cleanUser);
 
       const pickedItems = selectedItemsByTurn.get(turn.id) || [];
       if (includeToolDetails && pickedItems.length > 0) {
-        backboneLines.push('', '#### 关键工具动作', '');
+        backboneLines.push('', '#### Key Tool Actions', '');
         for (const item of pickedItems) {
           const badge = categoryBadge(item);
           const sizeTag = item.resultBytes > 0 ? ` · ${formatBytes(item.resultBytes)}` : '';
@@ -450,7 +450,7 @@ export function buildHandoffBundle(parsedSession, options = {}) {
             if (expandedBody) {
               backboneLines.push(
                 '',
-                `  _以下为 step#${item.resultStepIndex ?? item.plannerStepIndex} 按需展开的完整输出（单步上限 12 KB）：_`,
+                `  _Expanded full output for step#${item.resultStepIndex ?? item.plannerStepIndex} on demand (12 KB cap per step):_`,
                 '',
                 safeCodeFence(expandedBody, 'text'),
                 '',
@@ -470,7 +470,7 @@ export function buildHandoffBundle(parsedSession, options = {}) {
 
       if (includeAssistantReplies && turn.assistantText) {
         const replyBody = preserveHeadTailUtf8(turn.assistantText, MAX_SINGLE_BLOCK_BYTES);
-        backboneLines.push('', '#### AI 关键结论', '', replyBody);
+        backboneLines.push('', '#### Assistant Conclusions', '', replyBody);
       }
     }
 
@@ -479,8 +479,8 @@ export function buildHandoffBundle(parsedSession, options = {}) {
       backboneLines.push(
         '',
         tailStart === totalTurnsCount
-          ? `> _（已剪除第 ${tailStart} 轮对话）_`
-          : `> _（已剪除第 ${tailStart}–${totalTurnsCount} 轮对话）_`,
+          ? `> _(Pruned turn ${tailStart})_`
+          : `> _(Pruned turns ${tailStart}–${totalTurnsCount})_`,
       );
     }
   }
@@ -504,15 +504,15 @@ export function buildHandoffBundle(parsedSession, options = {}) {
   const sourceLogPath = session.fullFilePath || session.filePath || '';
   if (totalItemsCount > selectedItemsCount && sourceLogPath) {
     const traceLines = [
-      '## 原文无损回溯索引（防降智保底）',
+      '## Lossless Verbatim Traceback Index',
       '',
-      `- 完整原始日志：\`${sourceLogPath}\``,
-      `- 本交接包已完整保留全部选中轮次的原始需求、AI 结论、修改文件清单与真实 Git 状态；仅折叠了 ${totalItemsCount - selectedItemsCount} 步冗长工具日志/进度条。`,
+      `- Full source transcript: \`${sourceLogPath}\``,
+      `- All selected user requests, assistant conclusions, touched files, and live Git state are preserved verbatim; only ${totalItemsCount - selectedItemsCount} verbose tool logs/progress steps were folded.`,
     ];
     if (prunedItemSteps.length > 0) {
       const shown = prunedItemSteps.slice(-16);
-      const more = prunedItemSteps.length > 16 ? ` 等共 ${prunedItemSteps.length} 步` : '';
-      traceLines.push(`- 如确需复核某步完整原始输出，请直接按行读取上述日志对应 \`step_index\`（严禁猜测）：${shown.join('、')}${more}。`);
+      const more = prunedItemSteps.length > 16 ? ` (${prunedItemSteps.length} steps total)` : '';
+      traceLines.push(`- If you need the exact raw output of a folded step, read the corresponding \`step_index\` directly from the transcript above (never guess): ${shown.join(', ')}${more}.`);
     }
     sections.push(traceLines.join('\n'));
   }
@@ -620,20 +620,20 @@ export function buildLaunchPrompt(params = {}) {
   }
 
   const baseLines = [
-    '这是一次由 ContextRelay 外科剪枝生成的上下文交接会话。',
+    'This is a surgically pruned context handoff session created by Context Relay.',
     '',
-    `- **交接文档路径**：\`${normalizedHandoffPath || '(未提供交接文件路径)'}\``,
+    `- **Handoff Document**: \`${normalizedHandoffPath || '(handoff path not provided)'}\``,
   ];
 
   if (typeof targetWorkspace === 'string' && targetWorkspace.trim()) {
-    baseLines.push(`- **目标工作区**：\`${targetWorkspace.trim()}\``);
+    baseLines.push(`- **Target Workspace**: \`${targetWorkspace.trim()}\``);
   }
 
   baseLines.push(
     '',
-    '请严格按以下步骤开始：',
-    '1. 首先调用 `read_file` 读取上述交接文档，核实剪枝后的对话脉络、已修改文件清单以及当前 Git 仓库真实状态锚点；',
-    '2. 核实完成后，直接衔接当前状态继续执行后续工作，避免重复已完成步骤。',
+    'Follow these steps to resume:',
+    '1. Call `read_file` on the handoff document above to review the curated conversation backbone, touched files, and live Git repository anchor.',
+    '2. Continue seamlessly from the current state without repeating completed work.',
   );
 
   let prompt = baseLines.join('\n');
@@ -642,12 +642,12 @@ export function buildLaunchPrompt(params = {}) {
     rawExtra && shouldRedact ? redactSensitive(rawExtra, { enabled: true }).text : rawExtra;
 
   if (trimmedExtra) {
-    const extraHeader = '\n\n本次续接明确指令：\n';
+    const extraHeader = '\n\nExplicit Continuation Instruction:\n';
     const fullCandidate = `${prompt}${extraHeader}${trimmedExtra}`;
     if (Buffer.byteLength(fullCandidate, 'utf-8') <= MAX_FILE_LAUNCH_PROMPT_BYTES) {
       prompt = fullCandidate;
     } else {
-      const truncNotice = '\n…（完整指令见交接文档顶部）';
+      const truncNotice = '\n… (see full instruction at top of handoff document)';
       const remaining =
         MAX_FILE_LAUNCH_PROMPT_BYTES -
         Buffer.byteLength(prompt, 'utf-8') -
@@ -656,7 +656,7 @@ export function buildLaunchPrompt(params = {}) {
       if (remaining > 32) {
         prompt = `${prompt}${extraHeader}${sliceUtf8Prefix(trimmedExtra, remaining).trimEnd()}${truncNotice}`;
       } else {
-        const shortNote = '\n\n（本次续接明确指令已置顶写入交接文档，请读取后执行。）';
+        const shortNote = '\n\n(The explicit continuation instruction is pinned at the top of the handoff document.)';
         if (
           Buffer.byteLength(prompt + shortNote, 'utf-8') <= MAX_FILE_LAUNCH_PROMPT_BYTES
         ) {

@@ -19,7 +19,7 @@ This skill file lives at `<pluginRoot>/skills/fork/SKILL.md`. Derive `<pluginRoo
 
 ## Execution Routes
 
-### 1. Bare `/fork` (or "一键 fork / 瘦身重开") — Zero Prompts!
+### 1. Bare `/fork` (or "one-click fork / slim relaunch") — Zero Prompts!
 
 **NEVER call `ask_question`.** Immediately run:
 
@@ -27,42 +27,42 @@ This skill file lives at `<pluginRoot>/skills/fork/SKILL.md`. Derive `<pluginRoo
 node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --go --json
 ```
 
-This automatically executes in the **original workspace directory** with deterministic noise removal, real local Git anchor, lossless verbatim traceback index, 20-category secret redaction, inherited model, and auto-generated title `<原标题> (fork)`.
+This automatically executes in the **original workspace directory** with deterministic noise removal, real local Git anchor, lossless verbatim traceback index, 20-category secret redaction, inherited model, and auto-generated title `<original title> (fork)`.
 
 Reply in **exactly 2 ultra-concise lines** using Antigravity's native instant-jump link:
 
 ```markdown
-已一键 Fork 新对话：[<标题> (fork)](conversation://<newConversationId>)
-上下文 <原峰值> → ~<裁剪后>（减负 <X>%）· 目录 `<path>` · 模型 `<model>` · 原文无损可回溯
+Forked cleanly: [<Title> (fork)](conversation://<newConversationId>)
+Context <originalPeak> → ~<pruned> (-<X>%) · Workspace `<path>` · Model `<model>` · Lossless traceback ready
 ```
 
 ---
 
-### 2. `/fork <目录关键词>` — Fork Into Another Project Directory
+### 2. `/fork <project-keyword>` — Fork Into Another Project Directory
 
 1. Run deterministic target planning first:
    ```bash
-   node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --plan --to "<目录关键词>" --json
+   node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --plan --to "<project-keyword>" --json
    ```
 2. Act on `targetMatch.status`:
    - **`exact`**: **Zero prompts!** Immediately run:
      ```bash
-     node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --go --to "<matchedProjectId>" [--note "<用户附加要求>"] --json
+     node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --go --to "<matchedProjectId>" [--note "<extra-instruction>"] --json
      ```
      Then return the 2-line receipt above.
    - **`ambiguous`**: Call native **`ask_question`** **once** (`is_multi_select: false`) listing the matched candidate projects (plus an export-only fallback), then run `--go` with the chosen project ID and return the 2-line receipt.
    - **`not_found`**: Honestly inform the user that the folder has not been opened in Antigravity's left `Projects` sidebar yet (Antigravity provides no public API to register a new Project), and offer two clear options:
-     1. Open that folder once in Antigravity's left `Projects` sidebar, then re-run `/fork <目录关键词>`;
+     1. Open that folder once in Antigravity's left `Projects` sidebar, then re-run `/fork <project-keyword>`;
      2. Export a redacted handoff bundle (`--export-only`) for manual paste.
 
 ---
 
-### 3. `/fork 第N轮` — Turn-Bounded Fork
+### 3. `/fork until turn N` (or `--until N`) — Turn-Bounded Fork
 
 Truncate deterministically at turn `N` and fork in one click (no prompts unless combined with an ambiguous `--to`):
 
 ```bash
-node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --go --until <N> [--to "<matchedProjectId>"] [--note "<用户附加要求>"] --json
+node "<pluginRoot>/bin/context-relay.mjs" fork --session <currentConversationId> --go --until <N> [--to "<matchedProjectId>"] [--note "<extra-instruction>"] --json
 ```
 
 Return the 2-line receipt above.
@@ -87,13 +87,13 @@ Report total tokens saved, fork count, average reduction percentage, and the gen
 
 ---
 
-### 5. `/fork 搜 <关键词>` / Search Historical Sessions
+### 5. `/fork search <keyword>` — Search Historical Sessions
 
 ```bash
-node "<pluginRoot>/bin/context-relay.mjs" search "<关键词>" --limit 10 --json
+node "<pluginRoot>/bin/context-relay.mjs" search "<keyword>" --limit 10 --json
 ```
 
-Present hits directly as Antigravity native instant-jump links `[<标题>](conversation://<sessionId>)` with project folder, model, and timestamp.
+Present hits directly as Antigravity native instant-jump links `[<Title>](conversation://<sessionId>)` with project folder, model, and timestamp.
 
 ---
 

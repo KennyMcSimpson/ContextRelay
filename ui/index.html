@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN" data-theme="light">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Context Relay — 上下文手术台</title>
+  <title>Context Relay — Context Surgery Console</title>
   <!-- HOST_PRELOAD -->
   <link rel="stylesheet" href="./styles.css" />
 </head>
@@ -24,11 +24,11 @@
             </svg>
           </span>
           <span class="brand-title">Context Relay</span>
-          <span id="env-badge" class="pill pill-env" title="运行环境">Local Web</span>
+          <span id="env-badge" class="pill pill-env" title="Runtime environment">Local Web</span>
         </div>
 
         <div class="topbar-actions">
-          <button id="btn-sync" class="icon-btn" type="button" title="刷新会话与项目索引" aria-label="刷新索引">
+          <button id="btn-sync" class="icon-btn" type="button" title="Refresh session and project index" aria-label="Refresh index">
             <svg class="icon-sync" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
               <path d="M3 3v5h5"></path>
@@ -36,7 +36,7 @@
               <path d="M16 16h5v5"></path>
             </svg>
           </button>
-          <button id="btn-theme" class="icon-btn hidden" type="button" title="切换亮色 / 暗色主题" aria-label="切换主题">
+          <button id="btn-theme" class="icon-btn hidden" type="button" title="Toggle light / dark theme" aria-label="Toggle theme">
             <svg class="icon-sun" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="4"></circle>
               <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
@@ -48,17 +48,17 @@
         </div>
       </div>
 
-      <nav class="tabs" role="tablist" aria-label="主导航">
+      <nav class="tabs" role="tablist" aria-label="Primary navigation">
         <button class="tab-btn active" type="button" role="tab" aria-selected="true" data-tab="surgery" id="tab-surgery">
-          <span>手术台</span>
+          <span>Surgery</span>
           <span class="tab-badge mono" id="badge-surgery">0</span>
         </button>
         <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="sessions" id="tab-sessions">
-          <span>会话雷达</span>
+          <span>Session Radar</span>
           <span class="tab-badge mono" id="badge-sessions">0</span>
         </button>
         <button class="tab-btn" type="button" role="tab" aria-selected="false" data-tab="lineage" id="tab-lineage">
-          <span>血缘档案</span>
+          <span>Lineage &amp; Archives</span>
           <span class="tab-badge mono" id="badge-lineage">0</span>
         </button>
       </nav>
@@ -74,7 +74,7 @@
           <div class="skel skel-bar"></div>
           <div class="skel skel-turn"></div>
           <div class="skel skel-turn"></div>
-          <p class="skeleton-caption">正在载入会话上下文与项目索引…</p>
+          <p class="skeleton-caption">Loading session context and project index…</p>
         </div>
 
         <!-- Empty State -->
@@ -85,11 +85,11 @@
               <path d="M8 10h8M8 14h5"></path>
             </svg>
           </div>
-          <h2 class="empty-title">暂无载入手术台的会话</h2>
-          <p class="empty-desc" id="surgery-empty-desc">你可以刷新索引自动关联当前会话，或前往「会话雷达」挑选任意历史对话进行上下文裁剪与接力。</p>
+          <h2 class="empty-title">No session loaded in Surgery</h2>
+          <p class="empty-desc" id="surgery-empty-desc">Refresh the index to attach the active conversation, or open Session Radar to pick any historical thread for pruning and handoff.</p>
           <div class="empty-actions">
-            <button id="btn-empty-sync" class="btn btn-primary" type="button">刷新索引</button>
-            <button id="btn-empty-radar" class="btn btn-ghost" type="button">打开会话雷达</button>
+            <button id="btn-empty-sync" class="btn btn-primary" type="button">Refresh Index</button>
+            <button id="btn-empty-radar" class="btn btn-ghost" type="button">Open Session Radar</button>
           </div>
         </div>
 
@@ -97,7 +97,7 @@
         <div id="surgery-layout" class="surgery-layout hidden">
           <div class="surgery-main">
             <!-- Health Dashboard Card -->
-            <section class="card health-card" id="health-card" aria-label="会话健康仪表">
+            <section class="card health-card" id="health-card" aria-label="Session health dashboard">
               <div class="health-head">
                 <div class="health-title-wrap">
                   <h1 class="health-title" id="health-title" title="">—</h1>
@@ -106,19 +106,19 @@
                     <span class="pill pill-model mono" id="health-model">—</span>
                   </div>
                 </div>
-                <button id="btn-open-host" class="btn btn-xs btn-ghost hidden" type="button" title="在 Antigravity 主壳切换至该会话">
-                  在主壳打开
+                <button id="btn-open-host" class="btn btn-xs btn-ghost hidden" type="button" title="Switch to this session in the Antigravity host">
+                  Open in Host
                 </button>
               </div>
 
               <!-- Context Waterline Bar -->
               <div class="waterline" id="waterline">
                 <div class="waterline-row">
-                  <span class="waterline-label">上下文峰值水位</span>
+                  <span class="waterline-label">Peak Context Watermark</span>
                   <div class="waterline-values">
                     <span class="waterline-num mono" id="waterline-tokens">0</span>
-                    <span class="pill pill-status" id="waterline-status">健康</span>
-                    <span class="waterline-turns mono" id="waterline-turns">0 轮</span>
+                    <span class="pill pill-status" id="waterline-status">Healthy</span>
+                    <span class="waterline-turns mono" id="waterline-turns">0 turns</span>
                   </div>
                 </div>
                 <div class="progress-track" aria-hidden="true">
@@ -135,53 +135,53 @@
                   <path d="M18 9a9 9 0 0 1-9 9"></path>
                 </svg>
                 <span class="git-ref mono" id="git-ref">main @ —</span>
-                <span class="pill pill-git" id="git-dirty">工作区干净</span>
+                <span class="pill pill-git" id="git-dirty">Clean tree</span>
               </div>
             </section>
 
             <!-- Preset & Switch Toolbar -->
-            <section class="card toolbar-card" aria-label="一键手术预设">
-              <div class="preset-group" role="group" aria-label="裁剪预设">
-                <button class="preset-btn active" type="button" data-preset="smart-clean" title="自动剔除超长日志与低价值噪声，保留核心变更与错误诊断">智能去噪</button>
-                <button class="preset-btn" type="button" data-preset="backbone" title="仅保留对话主干与核心代码修改，最大限度压缩体积">仅留主干</button>
-                <button class="preset-btn" type="button" data-preset="all" title="全选所有轮次与工具步骤">全选</button>
-                <button class="preset-btn" type="button" data-preset="none" title="清空当前勾选，从零挑选">清空</button>
+            <section class="card toolbar-card" aria-label="One-click surgery presets">
+              <div class="preset-group" role="group" aria-label="Pruning presets">
+                <button class="preset-btn active" type="button" data-preset="smart-clean" title="Automatically strip oversized logs and low-value noise while keeping core edits and diagnostics">Smart Clean</button>
+                <button class="preset-btn" type="button" data-preset="backbone" title="Keep only the conversation backbone and core code edits for maximum compression">Backbone</button>
+                <button class="preset-btn" type="button" data-preset="all" title="Select all turns and tool steps">Select All</button>
+                <button class="preset-btn" type="button" data-preset="none" title="Clear current selection and pick from scratch">Clear</button>
               </div>
 
-              <div class="switch-group" role="group" aria-label="交接包内容选项">
-                <label class="toggle-chip" title="包含每轮助手可见回复">
+              <div class="switch-group" role="group" aria-label="Handoff bundle options">
+                <label class="toggle-chip" title="Include visible assistant replies for each selected turn">
                   <input type="checkbox" id="opt-assistant" checked />
-                  <span>AI 回复</span>
+                  <span>AI Replies</span>
                 </label>
-                <label class="toggle-chip" title="包含勾选的工具调用参数与输出摘要">
+                <label class="toggle-chip" title="Include selected tool call arguments and output previews">
                   <input type="checkbox" id="opt-tools" checked />
-                  <span>工具明细</span>
+                  <span>Tool Details</span>
                 </label>
-                <label class="toggle-chip" title="附带当前仓库 Git 分支、SHA 与变更状态">
+                <label class="toggle-chip" title="Attach live Git branch, HEAD SHA, and working tree status">
                   <input type="checkbox" id="opt-git" checked />
-                  <span>Git 锚点</span>
+                  <span>Git Anchor</span>
                 </label>
-                <label class="toggle-chip" title="自动识别并脱敏 Token、API Key、私钥等敏感信息">
+                <label class="toggle-chip" title="Automatically detect and scrub tokens, API keys, and private keys">
                   <input type="checkbox" id="opt-redact" checked />
-                  <span>敏感脱敏</span>
+                  <span>Redact Secrets</span>
                 </label>
               </div>
             </section>
 
             <!-- Touched Files Collapsible Card -->
-            <section class="card files-card hidden" id="files-section" aria-label="触碰文件速览">
+            <section class="card files-card hidden" id="files-section" aria-label="Touched files summary">
               <div class="files-head">
                 <button id="btn-toggle-files" class="files-toggle" type="button" aria-expanded="false">
                   <svg class="chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
-                  <span class="files-title">触碰文件</span>
-                  <span class="pill pill-edit mono" id="files-mod-count">已修改 0</span>
-                  <span class="pill pill-read mono" id="files-read-count">已读取 0</span>
+                  <span class="files-title">Touched Files</span>
+                  <span class="pill pill-edit mono" id="files-mod-count">Modified 0</span>
+                  <span class="pill pill-read mono" id="files-read-count">Read 0</span>
                 </button>
-                <label class="mini-check" title="在交接包中附带触碰文件清单">
+                <label class="mini-check" title="Include the touched files inventory in the handoff bundle">
                   <input type="checkbox" id="opt-files" checked />
-                  <span>附入清单</span>
+                  <span>Include list</span>
                 </label>
               </div>
               <div id="files-body" class="files-body hidden">
@@ -191,8 +191,8 @@
 
             <!-- Turn List Header -->
             <div class="section-bar">
-              <span class="section-title">逐轮手术台</span>
-              <span class="section-stat mono" id="turn-selection-stat">已选 0/0 轮 · 0 步</span>
+              <span class="section-title">Turn-by-Turn Surgery</span>
+              <span class="section-stat mono" id="turn-selection-stat">Selected 0/0 turns · 0 steps</span>
             </div>
 
             <!-- Turn-by-Turn Interactive List -->
@@ -200,17 +200,17 @@
           </div>
 
           <!-- Sticky Launchpad (Bottom Sticky on <1040px, Right Rail on >=1040px) -->
-          <aside class="launchpad" id="launchpad" aria-label="接力发射台">
+          <aside class="launchpad" id="launchpad" aria-label="Relay launchpad">
             <!-- Live Telemetry Strip -->
             <div class="lp-telemetry" id="lp-telemetry">
               <div class="lp-metric-main">
                 <span class="lp-pulse hidden" id="lp-spinner" aria-hidden="true"></span>
-                <span class="lp-slim-text mono" id="lp-slim-text">原峰值 — → 裁剪后 —</span>
-                <span class="pill pill-saved mono hidden" id="lp-saved-badge">减负 0%</span>
+                <span class="lp-slim-text mono" id="lp-slim-text">Peak — → Pruned —</span>
+                <span class="pill pill-saved mono hidden" id="lp-saved-badge">Saved 0%</span>
               </div>
               <div class="lp-metric-tags">
-                <span class="pill pill-redact mono hidden" id="lp-redact-badge" title="已自动脱敏敏感片段">脱敏 0</span>
-                <span class="pill pill-mode mono" id="lp-mode-badge" title="交接包传输方式">—</span>
+                <span class="pill pill-redact mono hidden" id="lp-redact-badge" title="Sensitive snippets automatically redacted">Redacted 0</span>
+                <span class="pill pill-mode mono" id="lp-mode-badge" title="Handoff delivery mode">—</span>
               </div>
             </div>
 
@@ -220,22 +220,22 @@
                 <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
-                <span>发射配置</span>
+                <span>Launch Config</span>
               </span>
-              <span class="lp-toggle-summary mono" id="lp-config-summary">展开设置目标目录与指令</span>
+              <span class="lp-toggle-summary mono" id="lp-config-summary">Configure target workspace &amp; instruction</span>
             </button>
 
             <!-- Configuration Fields -->
             <div class="lp-config-body" id="lp-config-body">
               <div class="field">
-                <label class="field-label" for="lp-project">目标项目目录</label>
+                <label class="field-label" for="lp-project">Target Project Directory</label>
                 <select id="lp-project" class="input select"></select>
-                <p class="field-hint">未列出目标目录？请先在左侧 Projects 打开过一次后再点刷新</p>
+                <p class="field-hint">Missing a folder? Open it once in Antigravity's left Projects sidebar, then refresh.</p>
               </div>
 
               <div class="field-grid">
                 <div class="field">
-                  <label class="field-label" for="lp-model">模型</label>
+                  <label class="field-label" for="lp-model">Model</label>
                   <input id="lp-model" class="input mono" type="text" list="model-options" placeholder="pro" autocomplete="off" />
                   <datalist id="model-options">
                     <option value="pro"></option>
@@ -245,20 +245,20 @@
                 </div>
 
                 <div class="field">
-                  <label class="field-label" for="lp-title">新会话标题</label>
-                  <input id="lp-title" class="input" type="text" placeholder="[Relay] 新会话标题" />
+                  <label class="field-label" for="lp-title">New Session Title</label>
+                  <input id="lp-title" class="input" type="text" placeholder="[Relay] New session title" />
                 </div>
               </div>
 
               <div class="field">
-                <label class="field-label" for="lp-instruction">续接附加指令（可选）</label>
-                <textarea id="lp-instruction" class="input textarea" rows="2" placeholder="例如：接手后先不要改代码，直接排查第 3 步的报错原因"></textarea>
+                <label class="field-label" for="lp-instruction">Continuation Instruction (optional)</label>
+                <textarea id="lp-instruction" class="input textarea" rows="2" placeholder="e.g., Inspect the error in step 3 before editing any code"></textarea>
               </div>
             </div>
 
             <!-- Standalone Web / Agent API Hint -->
             <div id="lp-web-hint" class="lp-notice hidden">
-              独立 Web 模式不支持一键拉起宿主会话，请直接复制交接包或导出 MD。
+              Standalone local web mode cannot launch host sessions directly. Use Copy Bundle or Export MD.
             </div>
 
             <!-- Action Buttons -->
@@ -268,12 +268,12 @@
                   <path d="M5 12h14"></path>
                   <path d="m12 5 7 7-7 7"></path>
                 </svg>
-                <span>启动新会话并跳转</span>
+                <span>Launch &amp; Open Session</span>
               </button>
               <div class="lp-secondary-row">
-                <button id="btn-copy" class="btn btn-secondary" type="button">复制交接包</button>
-                <button id="btn-preview" class="btn btn-ghost" type="button">预览</button>
-                <button id="btn-export" class="btn btn-ghost" type="button">导出 MD</button>
+                <button id="btn-copy" class="btn btn-secondary" type="button">Copy Bundle</button>
+                <button id="btn-preview" class="btn btn-ghost" type="button">Preview</button>
+                <button id="btn-export" class="btn btn-ghost" type="button">Export MD</button>
               </div>
             </div>
           </aside>
@@ -288,26 +288,26 @@
               <circle cx="11" cy="11" r="8"></circle>
               <path d="m21 21-4.3-4.3"></path>
             </svg>
-            <input id="radar-search" class="input search-input" type="search" placeholder="搜索标题、正文、文件路径…" autocomplete="off" />
-            <button id="btn-clear-search" class="search-clear hidden" type="button" aria-label="清除搜索">×</button>
+            <input id="radar-search" class="input search-input" type="search" placeholder="Search titles, content, file paths…" autocomplete="off" />
+            <button id="btn-clear-search" class="search-clear hidden" type="button" aria-label="Clear search">×</button>
           </div>
 
           <div class="radar-filters">
-            <select id="radar-project" class="input select" aria-label="按项目筛选">
-              <option value="">全部项目</option>
+            <select id="radar-project" class="input select" aria-label="Filter by project">
+              <option value="">All Projects</option>
             </select>
-            <select id="radar-model" class="input select mono" aria-label="按模型筛选">
-              <option value="">全部模型</option>
+            <select id="radar-model" class="input select mono" aria-label="Filter by model">
+              <option value="">All Models</option>
             </select>
             <label class="mini-check radar-subagent">
               <input type="checkbox" id="radar-hide-subagents" checked />
-              <span>隐藏子代理</span>
+              <span>Hide Subagents</span>
             </label>
           </div>
 
           <div class="radar-status">
-            <span id="radar-count" class="mono">共 0 条会话</span>
-            <button id="btn-reset-filters" class="link-btn hidden" type="button">重置筛选</button>
+            <span id="radar-count" class="mono">0 sessions</span>
+            <button id="btn-reset-filters" class="link-btn hidden" type="button">Reset Filters</button>
           </div>
         </div>
 
@@ -319,16 +319,16 @@
         <div class="lineage-grid">
           <section class="lineage-section">
             <div class="section-bar">
-              <span class="section-title">手术交接血缘流</span>
-              <span class="section-stat mono" id="lineage-count">0 条记录</span>
+              <span class="section-title">Handoff Lineage</span>
+              <span class="section-stat mono" id="lineage-count">0 records</span>
             </div>
             <div id="lineage-list" class="lineage-list"></div>
           </section>
 
           <section class="archives-section">
             <div class="section-bar">
-              <span class="section-title">已导出交接包档案（<code class="mono section-code">handoffs/*.md</code>）</span>
-              <span class="section-stat mono" id="archives-count">0 份档案</span>
+              <span class="section-title">Exported Handoff Archives (<code class="mono section-code">handoffs/*.md</code>)</span>
+              <span class="section-stat mono" id="archives-count">0 archives</span>
             </div>
             <div id="archives-list" class="archives-list"></div>
           </section>
@@ -343,15 +343,15 @@
     <div class="modal-dialog">
       <div class="modal-head">
         <div class="modal-head-info">
-          <h2 class="modal-title" id="modal-title">交接包预览</h2>
+          <h2 class="modal-title" id="modal-title">Handoff Preview</h2>
           <div class="modal-badges mono" id="modal-badges"></div>
         </div>
         <div class="modal-head-actions">
-          <label class="mini-check" title="开启或关闭代码区自动换行">
+          <label class="mini-check" title="Toggle word wrap in preview">
             <input type="checkbox" id="modal-wrap" checked />
-            <span>换行</span>
+            <span>Wrap</span>
           </label>
-          <button id="btn-modal-close" class="icon-btn" type="button" aria-label="关闭预览" title="关闭 (Esc)">
+          <button id="btn-modal-close" class="icon-btn" type="button" aria-label="Close preview" title="Close (Esc)">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 6 6 18M6 6l12 12"></path>
             </svg>
@@ -366,8 +366,8 @@
       <div class="modal-foot">
         <span class="modal-filepath mono" id="modal-filepath" title=""></span>
         <div class="modal-foot-btns">
-          <button id="btn-modal-copy" class="btn btn-primary" type="button">复制 Markdown</button>
-          <button id="btn-modal-done" class="btn btn-ghost" type="button">关闭</button>
+          <button id="btn-modal-copy" class="btn btn-primary" type="button">Copy Markdown</button>
+          <button id="btn-modal-done" class="btn btn-ghost" type="button">Close</button>
         </div>
       </div>
     </div>

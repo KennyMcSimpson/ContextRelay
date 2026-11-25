@@ -19,7 +19,6 @@
 </p>
 
 <p align="center">
-  <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a> &nbsp;|&nbsp;
   <a href="#quick-start">Quick Start</a> ·
   <a href="#fork-vs-compact">/fork vs /compact</a> ·
   <a href="#everyday-commands">Commands</a> ·
@@ -58,7 +57,7 @@ When a session gets heavy, Context Relay's 0-token `PreInvocation` hook lets you
 - **Live Sidebar Title Sync (Zero SQLite)**: Reads Antigravity's plain-text `annotations/<id>.pbtxt` so your renamed sidebar title is preserved verbatim (`Auth Refactor` → `Auth Refactor (fork)` → `Auth Refactor (fork #2)`).
 - **Ultra-Clean `/` Menu**: Only `/fork` appears in Antigravity's slash-command menu (legacy aliases `relay` and `context-relay` stay hidden via `disable-slash-command: true`).
 - **0-Token Context Bloat Nudge**: `hooks/nudge.mjs` injects subtle inline `metadata.user_markdown` reminders with **0 model tokens** only when noise crosses threshold (opt out anytime via `CONTEXT_RELAY_NUDGE=0`).
-- **Cross-Project & Turn-Bounded Forking**: Move curated context straight into another registered workspace (`/fork <project-keyword>`) or branch cleanly from an earlier turn (`/fork 第N轮`).
+- **Cross-Project & Turn-Bounded Forking**: Move curated context straight into another registered workspace (`/fork <project-keyword>`) or branch cleanly from an earlier turn (`/fork until turn N`).
 - **Shareable Token-Savings Card (`stats --svg`)**: Track real cumulative tokens saved with `/fork stats` or generate a crisp GitHub-ready SVG benchmark card via CLI.
 - **Zero Dependencies & 100% Local**: Pure Node.js ESM (`>= 22.15.0`) — no `npm install`, no telemetry, no external API calls.
 
@@ -95,9 +94,9 @@ node bin/context-relay.mjs install antigravity --data-dir <custom-dir>
 | :--- | :--- |
 | `/fork` | **0 popups** — immediately denoises the current conversation in the original folder, names it `<Live Sidebar Title> (fork)`, inherits the active model, and returns a clickable `conversation://<id>` link. |
 | `/fork <folder-keyword>` | Plans target workspace match (`exact` → instant `--go` with 0 popups; `ambiguous` → 1 native `ask_question` card; `not_found` → explains registering the folder in left `Projects` or exporting). |
-| `/fork 第N轮` | Deterministically branches up to turn `N` (`--until <N>`) into a clean session without later detours. |
+| `/fork until turn N` | Deterministically branches up to turn `N` (`--until <N>`) into a clean session without later detours. |
 | `/fork stats` | Reports cumulative tokens saved across forks and can export a GitHub SVG war-report card (`--svg`). |
-| `/fork 搜 <keyword>` | Full-text searches indexed historical sessions (including live renamed titles) and returns clickable `[<Title>](conversation://<sessionId>)` links. |
+| `/fork search <keyword>` | Full-text searches indexed historical sessions (including live renamed titles) and returns clickable `[<Title>](conversation://<sessionId>)` links. |
 
 ### Environment Variables
 

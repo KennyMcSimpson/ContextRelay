@@ -224,9 +224,9 @@ function extractUserRequest(content, media) {
 
   if (!cleanText) {
     if (Array.isArray(media) && media.length > 0) {
-      cleanText = `[附件输入 x${media.length}]`;
+      cleanText = `[Attachment input x${media.length}]`;
     } else if (settingsModel) {
-      cleanText = `(设置变更：模型切换至 ${settingsModel})`;
+      cleanText = `(Settings change: switched model to ${settingsModel})`;
     }
   }
 
@@ -316,13 +316,13 @@ function extractTargetPath(toolName, args) {
 
 function buildActionSummary(toolName, category, args, targetPath, command) {
   if (category === 'write') {
-    return `${toolName} ${targetPath || '(未指定路径)'}`;
+    return `${toolName} ${targetPath || '(unspecified path)'}`;
   }
   if (category === 'read') {
     const start = args.StartLine ?? args.startLine;
     const end = args.EndLine ?? args.endLine;
     const range = start || end ? ` (L${start || 1}-${end || 'EOF'})` : '';
-    return `${toolName} ${targetPath || '(未指定路径)'}${range}`;
+    return `${toolName} ${targetPath || '(unspecified path)'}${range}`;
   }
   if (category === 'command') {
     const summaryLabel =
@@ -330,7 +330,7 @@ function buildActionSummary(toolName, category, args, targetPath, command) {
         ? `[${args.toolSummary.trim()}] `
         : '';
     const oneLineCmd = command.replace(/\s+/g, ' ').trim();
-    return `${toolName}: ${summaryLabel}${safeTruncate(oneLineCmd || '(空命令)', 140)}`;
+    return `${toolName}: ${summaryLabel}${safeTruncate(oneLineCmd || '(empty command)', 140)}`;
   }
   if (category === 'search') {
     const q = args.Query || args.query || args.Pattern || args.pattern || '';
@@ -363,7 +363,7 @@ function detectStepError(toolName, resultStep, resultContent, resultBytes) {
   return ERROR_TEXT_GENERAL_RE.test(resultContent);
 }
 
-function extractTitleFromText(text, fallback = '未命名会话') {
+function extractTitleFromText(text, fallback = 'Untitled session') {
   if (typeof text !== 'string' || !text.trim()) return fallback;
   const lines = text
     .split(/\r?\n/)
@@ -627,7 +627,7 @@ export function parseSessionTranscript(steps, meta = {}) {
             sourceType: 'SYSTEM_MESSAGE',
             stepIndex,
             createdAt: ts,
-            userText: '(无显式用户输入)',
+            userText: '(no explicit user input)',
             rawLength: 0,
           });
         }
@@ -832,7 +832,7 @@ export function parseSessionTranscript(steps, meta = {}) {
     recordSessionModel(safeMeta.model);
   }
 
-  const fallbackTitle = sessionId ? `会话 ${sessionId.slice(0, 8)}` : '未命名会话';
+  const fallbackTitle = sessionId ? `Session ${sessionId.slice(0, 8)}` : 'Untitled session';
   const title =
     typeof safeMeta.title === 'string' && safeMeta.title.trim()
       ? safeMeta.title.trim()

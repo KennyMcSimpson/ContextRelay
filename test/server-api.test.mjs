@@ -108,7 +108,7 @@ async function createIsolatedServerFixture() {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T12:00:00.000Z',
-      content: '<USER_REQUEST>构建本地 HTTP 服务端接口与安全护栏 TURN_ONE_MARKER_AAA</USER_REQUEST>',
+      content: '<USER_REQUEST>Build local HTTP server endpoints and security guards TURN_ONE_MARKER_AAA</USER_REQUEST>',
     },
     {
       step_index: 1,
@@ -120,7 +120,7 @@ async function createIsolatedServerFixture() {
       input_tokens: 14000,
       cache_read_tokens: 2000,
       output_tokens: 400,
-      content: '已完成本地 loopback HTTP 服务端与 Host/Origin 校验逻辑 TURN_ONE_REPLY_AAA。',
+      content: 'Implemented local loopback HTTP server with Host/Origin validation TURN_ONE_REPLY_AAA.',
       tool_calls: [
         { name: 'edit_file', arguments: { Path: 'E:/demo/app/server/http.mjs' } },
       ],
@@ -140,7 +140,7 @@ async function createIsolatedServerFixture() {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T12:02:00.000Z',
-      content: '<USER_REQUEST>第二轮补充任务 TURN_TWO_MARKER_BBB</USER_REQUEST>',
+      content: '<USER_REQUEST>Turn two follow-up task TURN_TWO_MARKER_BBB</USER_REQUEST>',
     },
     {
       step_index: 4,
@@ -152,7 +152,7 @@ async function createIsolatedServerFixture() {
       input_tokens: 19000,
       cache_read_tokens: 3000,
       output_tokens: 300,
-      content: '已完成第二轮内容 TURN_TWO_REPLY_BBB。',
+      content: 'Completed turn two follow-up TURN_TWO_REPLY_BBB.',
     },
   ];
   const shortFullSteps = shortSteps.map((s) =>
@@ -175,7 +175,7 @@ async function createIsolatedServerFixture() {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T12:10:00.000Z',
-      content: '<USER_REQUEST>输出完整的架构决策记录并准备跨会话接力</USER_REQUEST>',
+      content: '<USER_REQUEST>Write full architecture decision record and prepare cross-session relay</USER_REQUEST>',
     },
     {
       step_index: 1,
@@ -326,12 +326,12 @@ describe('server HTTP + API integration & security guards', () => {
         selectedTurnIndices: [1],
         redact: true,
         includeGitAnchor: false,
-        extraInstruction: '继续完善测试覆盖率',
+        extraInstruction: 'Continue expanding test coverage',
       },
     });
     assert.equal(previewRes.status, 200);
     const previewMd = String(previewRes.json?.bundle?.markdown ?? '');
-    assert.ok(previewMd.includes('继续完善测试覆盖率'));
+    assert.ok(previewMd.includes('Continue expanding test coverage'));
     assert.ok(previewMd.includes('TURN_ONE_MARKER_AAA'), 'selectedTurnIndices: [1] must select 1-based Turn 1');
     assert.ok(!previewMd.includes('TURN_TWO_MARKER_BBB'), 'selectedTurnIndices: [1] must NOT select Turn 2');
 
@@ -372,7 +372,7 @@ describe('server HTTP + API integration & security guards', () => {
         selectedTurnIndices: [1],
         redact: true,
         includeGitAnchor: false,
-        extraInstruction: '短包接力继续开发',
+        extraInstruction: 'Inline short-bundle continuation',
       },
     });
     assert.equal(launchShortRes.status, 200);
@@ -394,7 +394,7 @@ describe('server HTTP + API integration & security guards', () => {
         selectedTurnIds: ['turn-1'],
         redact: true,
         includeGitAnchor: false,
-        extraInstruction: `超长交接包检查 API_KEY=${extraSecretKey} 与 ${extraSecretGhp}`,
+        extraInstruction: `Oversized handoff check API_KEY=${extraSecretKey} and ${extraSecretGhp}`,
       },
     });
     assert.equal(launchLargeRes.status, 200);

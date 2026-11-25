@@ -88,7 +88,7 @@ describe('fs-utils: fileUriToPath, slugify, canonicalFileKey, atomicWriteFile, w
   });
 
   test('slugify sanitizes punctuation/separators and canonicalFileKey normalizes paths', () => {
-    const slug = slugify('Fix Auth / Login: 中文测试 2026!@#');
+    const slug = slugify('Fix Auth / Login: Session Token 2026!@#');
     assert.equal(typeof slug, 'string');
     assert.ok(slug.length > 0);
     assert.ok(!/[\\/:*?"<>|]/.test(slug), `slug must not contain unsafe path chars: ${slug}`);
@@ -107,13 +107,13 @@ describe('fs-utils: fileUriToPath, slugify, canonicalFileKey, atomicWriteFile, w
     const dir = createTempDir('context-relay-atomic-');
     const target = path.join(dir, 'state.json');
 
-    atomicWriteFile(target, JSON.stringify({ hello: '世界', v: 1 }), 'utf8');
+    atomicWriteFile(target, JSON.stringify({ hello: 'café', v: 1 }), 'utf8');
     const raw1 = fs.readFileSync(target);
     assert.ok(!(raw1[0] === 0xef && raw1[1] === 0xbb && raw1[2] === 0xbf), 'must be UTF-8 without BOM');
-    assert.deepEqual(JSON.parse(raw1.toString('utf8')), { hello: '世界', v: 1 });
+    assert.deepEqual(JSON.parse(raw1.toString('utf8')), { hello: 'café', v: 1 });
 
-    atomicWriteFile(target, JSON.stringify({ hello: '更新', v: 2 }), 'utf8');
-    assert.deepEqual(JSON.parse(fs.readFileSync(target, 'utf8')), { hello: '更新', v: 2 });
+    atomicWriteFile(target, JSON.stringify({ hello: 'updated-café', v: 2 }), 'utf8');
+    assert.deepEqual(JSON.parse(fs.readFileSync(target, 'utf8')), { hello: 'updated-café', v: 2 });
   });
 
   test('real multi-process lock stress test: 6 worker processes x 20 RMW updates = exact 120 with zero lost updates and no .held/.reclaim residue', async () => {
@@ -265,7 +265,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         type: 'USER_INPUT',
         status: 'DONE',
         created_at: '2026-11-24T09:00:00.000Z',
-        content: '<USER_REQUEST>优化神经网络 decoder 推理延迟并运行 benchmark</USER_REQUEST>',
+        content: '<USER_REQUEST>Optimize neural decoder inference latency and run benchmark</USER_REQUEST>',
       },
       {
         step_index: 1,
@@ -277,7 +277,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         input_tokens: 15000,
         cache_read_tokens: 2000,
         output_tokens: 300,
-        content: '已经修改 src/decoder.mjs 减少张量拷贝，benchmark 延迟下降 28%。',
+        content: 'Updated src/decoder.mjs to reduce tensor copies; benchmark latency dropped by 28%.',
         tool_calls: [
           { name: 'edit_file', arguments: { Path: 'E:/demo/proj-alpha/src/decoder.mjs' } },
         ],
@@ -291,7 +291,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         type: 'USER_INPUT',
         status: 'DONE',
         created_at: '2026-11-24T09:30:00.000Z',
-        content: '<USER_REQUEST>给神经网络网关 router 增加 telemetry 指标</USER_REQUEST>',
+        content: '<USER_REQUEST>Add telemetry metrics to the neural gateway router</USER_REQUEST>',
       },
       {
         step_index: 1,
@@ -303,7 +303,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         input_tokens: 9000,
         cache_read_tokens: 1000,
         output_tokens: 240,
-        content: '已更新 src/router.mjs 上报延迟直方图。',
+        content: 'Updated src/router.mjs to report latency histograms.',
         tool_calls: [
           { name: 'edit_file', arguments: { Path: 'E:/demo/proj-alpha/src/router.mjs' } },
         ],
@@ -319,7 +319,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         status: 'DONE',
         created_at: '2026-11-24T09:40:00.000Z',
         content:
-          '<SYSTEM_MESSAGE>\n[Message] timestamp=2026-11-24T09:40:00Z sender=conv-alpha-001 priority=MESSAGE_PRIORITY_HIGH content=后台核查神经网络配置\n</SYSTEM_MESSAGE>',
+          '<SYSTEM_MESSAGE>\n[Message] timestamp=2026-11-24T09:40:00Z sender=conv-alpha-001 priority=MESSAGE_PRIORITY_HIGH content=Audit neural gateway configuration in background\n</SYSTEM_MESSAGE>',
       },
       {
         step_index: 1,
@@ -330,7 +330,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         model: 'gemini-2.5-pro',
         input_tokens: 3200,
         output_tokens: 120,
-        content: '子代理核查完成。',
+        content: 'Subagent verification complete.',
         tool_calls: [
           { name: 'send_message', arguments: { Recipient: 'conv-alpha-001', Message: 'ok' } },
         ],
@@ -379,7 +379,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T09:50:00.000Z',
-      content: '<USER_REQUEST>补充验证增量同步关键字 incrementalToken99</USER_REQUEST>',
+      content: '<USER_REQUEST>Verify incremental sync keyword incrementalToken99</USER_REQUEST>',
     };
     fs.appendFileSync(conv1Path, JSON.stringify(extraStep) + '\n', 'utf8');
     const bumpedTime = new Date(Date.now() + 5000);
@@ -389,7 +389,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
     assert.equal(sync3.updated, 1);
     assert.equal(sync3.skipped, 2);
 
-    // 4. listSessions: hideSubagents, multi-term AND search (CN + EN), model filter
+    // 4. listSessions: hideSubagents, multi-term AND search, model filter
     const allRes = store.listSessions({ hideSubagents: false });
     assert.equal(allRes.sessions.length, 3);
 
@@ -397,8 +397,8 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
     assert.equal(mainOnlyRes.sessions.length, 2);
     assert.ok(!mainOnlyRes.sessions.some((s) => s.sessionId === 'conv-subagent-003'));
 
-    // Multi-word AND search: Chinese + English
-    const andHit = store.listSessions({ q: '神经网络 decoder', hideSubagents: false });
+    // Multi-word AND search
+    const andHit = store.listSessions({ q: 'neural decoder', hideSubagents: false });
     assert.equal(andHit.sessions.length, 1);
     assert.equal(andHit.sessions[0].sessionId, 'conv-alpha-001');
 
@@ -408,7 +408,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
     assert.equal(incHit.sessions[0].sessionId, 'conv-alpha-001');
 
     // Negative control: one matching word + one non-existent word must return 0 (proving AND, not OR)
-    const andMiss = store.listSessions({ q: '神经网络 nonexistent_xyz_term', hideSubagents: false });
+    const andMiss = store.listSessions({ q: 'neural nonexistent_xyz_term', hideSubagents: false });
     assert.equal(andMiss.sessions.length, 0);
 
     // Model filter
@@ -540,8 +540,8 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
     for (let turnNum = 1; turnNum <= 12; turnNum += 1) {
       const uniqueNeedle =
         turnNum === 6
-          ? '这里埋入中段第6轮唯一检索词 midTurnNeedleGamma6677 用于验证全轮次索引'
-          : `常规第 ${turnNum} 轮迭代讨论与常规背景信息`;
+          ? 'Middle turn 6 unique search term midTurnNeedleGamma6677 to verify full-turn indexing'
+          : `Routine turn ${turnNum} iteration discussion and standard context details`;
       steps.push({
         step_index: stepIndex++,
         source: 'USER_EXPLICIT',
@@ -561,8 +561,8 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         output_tokens: 150,
         content:
           turnNum === 6
-            ? '已确认中段第6轮核心结论 midTurnNeedleGamma6677 并记录在案。'
-            : `第 ${turnNum} 轮常规答复完成。`,
+            ? 'Confirmed key turn 6 conclusion midTurnNeedleGamma6677 and recorded it.'
+            : `Completed standard reply for turn ${turnNum}.`,
       });
     }
 
@@ -628,7 +628,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         type: 'USER_INPUT',
         status: 'DONE',
         created_at: '2026-11-25T00:10:00.000Z',
-        content: '<USER_REQUEST>最初的长提问内容不应该覆盖用户重命名的标题</USER_REQUEST>',
+        content: '<USER_REQUEST>Initial long user prompt should not override the sidebar renamed title</USER_REQUEST>',
       },
       {
         step_index: 1,
@@ -639,14 +639,14 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
         model: 'gemini-4-neon',
         input_tokens: 12000,
         output_tokens: 180,
-        content: '收到，开始处理。',
+        content: 'Acknowledged, starting now.',
       },
     ]);
 
     const pbtxtPath = path.join(annotationsDir, `${convId}.pbtxt`);
     fs.writeFileSync(
       pbtxtPath,
-      'title:"反重力插件-1" last_user_view_time:{seconds:1795540462 nanos:666000000}',
+      'title:"Auth Refactor-1" last_user_view_time:{seconds:1795540462 nanos:666000000}',
       'utf8',
     );
 
@@ -656,15 +656,15 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
     const firstSync = store.syncAll();
     assert.equal(firstSync.updated, 1);
 
-    const listed1 = store.listSessions({ q: '反重力插件-1', hideSubagents: false });
+    const listed1 = store.listSessions({ q: 'Auth Refactor-1', hideSubagents: false });
     assert.equal(listed1.sessions.length, 1);
-    assert.equal(listed1.sessions[0].title, '反重力插件-1');
-    assert.equal(store.getSessionDetail(convId)?.title, '反重力插件-1');
+    assert.equal(listed1.sessions[0].title, 'Auth Refactor-1');
+    assert.equal(store.getSessionDetail(convId)?.title, 'Auth Refactor-1');
 
     // Rename ONLY annotations/<id>.pbtxt without touching transcript.jsonl
     fs.writeFileSync(
       pbtxtPath,
-      'title:"反重力插件-终版" last_user_view_time:{seconds:1795540999 nanos:123000000}',
+      'title:"Auth Refactor-Final" last_user_view_time:{seconds:1795540999 nanos:123000000}',
       'utf8',
     );
     const futureTime = new Date(Date.now() + 5000);
@@ -672,8 +672,8 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
 
     const renameSync = store.syncAll();
     assert.equal(renameSync.updated, 1, 'changing only .pbtxt must refresh cached index title');
-    assert.equal(store.listSessions({ q: '反重力插件-终版', hideSubagents: false }).sessions.length, 1);
-    assert.equal(store.getSessionDetail(convId)?.title, '反重力插件-终版');
+    assert.equal(store.listSessions({ q: 'Auth Refactor-Final', hideSubagents: false }).sessions.length, 1);
+    assert.equal(store.getSessionDetail(convId)?.title, 'Auth Refactor-Final');
 
     // Clear title field in .pbtxt (keep only last_user_view_time) -> syncSingle restores transcript title
     fs.writeFileSync(
@@ -688,7 +688,7 @@ describe('store: syncAll, listSessions, enrichProjects, prototype safety, archiv
     assert.equal(clearSync.updated, true, 'clearing .pbtxt title must trigger restoration');
     const detailAfterClear = store.getSessionDetail(convId);
     assert.ok(
-      detailAfterClear?.title.includes('最初的长提问内容'),
+      detailAfterClear?.title.includes('Initial long user prompt'),
       `expected fallback to original transcript title, got: ${detailAfterClear?.title}`,
     );
   });

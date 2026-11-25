@@ -433,7 +433,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
     emitRelayError(
       flags,
       { error: 'Cannot combine --plan and --go in the same invocation' },
-      'Error: --plan 与 --go 不能同时使用，请二选一。',
+      'Error: --plan and --go cannot be combined. Choose one.',
     );
     return;
   }
@@ -444,7 +444,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
     emitRelayError(
       flags,
       { error: `Invalid --preset: ${presetRaw} (expected smart-clean or backbone)` },
-      `Error: 无效的 --preset 值 "${presetRaw}"（支持 smart-clean 或 backbone）。`,
+      `Error: Invalid --preset value "${presetRaw}" (expected smart-clean or backbone).`,
     );
     return;
   }
@@ -456,7 +456,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
       emitRelayError(
         flags,
         { error: `Invalid --until value: ${flags.until} (expected integer >= 1)` },
-        `Error: 无效的 --until 值 "${flags.until}"（应为 >= 1 的整数轮次）。`,
+        `Error: Invalid --until value "${flags.until}" (expected integer >= 1).`,
       );
       return;
     }
@@ -486,7 +486,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
     emitRelayError(
       flags,
       { error: 'No sessions found in local Antigravity index' },
-      '未在本地索引中找到可用会话，请先确认 Antigravity 对话记录存在或指定 --session <id>。',
+      'No sessions found in the local index. Confirm Antigravity transcripts exist or pass --session <id>.',
     );
     return;
   }
@@ -496,7 +496,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
     emitRelayError(
       flags,
       { error: `Session not found: ${targetSessionId}`, sessionId: targetSessionId },
-      `未找到指定会话：${targetSessionId}`,
+      `Session not found: ${targetSessionId}`,
     );
     return;
   }
@@ -637,28 +637,28 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
       return;
     }
 
-    console.log(`=== Context Relay 预演计划 ===`);
-    console.log(`源会话:   ${planResult.session.title || '(未命名)'} (${effectiveSessionId})`);
-    console.log(`模型:     ${planResult.session.model || '-'}`);
-    console.log(`当前目录: ${planResult.session.workspacePath || '未关联'}`);
+    console.log(`=== Context Relay Dry-Run Plan ===`);
+    console.log(`Session:   ${planResult.session.title || '(untitled)'} (${effectiveSessionId})`);
+    console.log(`Model:     ${planResult.session.model || '-'}`);
+    console.log(`Workspace: ${planResult.session.workspacePath || 'unlinked'}`);
     console.log(
-      `瘦身预估: ${formatCompact(planResult.plan.originalPeakTokens)} → ~${formatCompact(planResult.plan.handoffEstimatedTokens)} tok` +
-        `（节省 ${planResult.plan.savedPercent}% | ${formatBytes(planResult.plan.bytes)} | 脱敏 ${planResult.plan.redactionCount} 处）`,
+      `Estimate:  ${formatCompact(planResult.plan.originalPeakTokens)} → ~${formatCompact(planResult.plan.handoffEstimatedTokens)} tok` +
+        ` (-${planResult.plan.savedPercent}% | ${formatBytes(planResult.plan.bytes)} | ${planResult.plan.redactionCount} redaction(s))`,
     );
     console.log(
-      `裁剪策略: ${effectivePreset}（保留 ${planResult.plan.selectedTurnsCount}/${planResult.plan.totalTurnsCount} 轮，` +
-        `${planResult.plan.selectedItemsCount}/${planResult.plan.totalItemsCount} 条工具步骤，建议模式: ${planResult.plan.recommendFileMode ? 'file' : 'inline'}）`,
+      `Strategy:  ${effectivePreset} (kept ${planResult.plan.selectedTurnsCount}/${planResult.plan.totalTurnsCount} turns, ` +
+        `${planResult.plan.selectedItemsCount}/${planResult.plan.totalItemsCount} tool steps, mode: ${planResult.plan.recommendFileMode ? 'file' : 'inline'})`,
     );
     if (toKeyword) {
       console.log(
-        `目标匹配: "${toKeyword}" -> ${targetMatch.status}` +
+        `Target:    "${toKeyword}" -> ${targetMatch.status}` +
           (targetMatch.matched
             ? ` (${targetMatch.matched.displayName || targetMatch.matched.projectId}: ${targetMatch.matched.primaryPath})`
-            : `（候选 ${targetMatch.candidates.length} 个）`),
+            : ` (${targetMatch.candidates.length} candidate(s))`),
       );
     }
     if (otherProjects.length > 0) {
-      console.log(`其他已知项目 (${otherProjects.length}):`);
+      console.log(`Other known projects (${otherProjects.length}):`);
       for (const p of otherProjects.slice(0, 8)) {
         console.log(`  - ${p.displayName || p.projectId}: ${p.primaryPath || p.projectId}`);
       }
@@ -680,7 +680,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
           projects: allProjects,
           otherProjects,
         },
-        `目标项目关键词 "${toKeyword}" 匹配到多个候选，已中止以防误发：\n` +
+        `Ambiguous target project keyword "${toKeyword}"; matched multiple candidates (aborted to prevent misrouting):\n` +
           targetMatch.candidates
             .map((p) => `  - ${p.displayName || p.projectId} (${p.projectId}) -> ${p.primaryPath || ''}`)
             .join('\n'),
@@ -696,14 +696,14 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
           projects: allProjects,
           otherProjects,
         },
-        `未找到匹配 "${toKeyword}" 的已知项目，已中止以防误发。` +
+        `No known project matched "${toKeyword}"; aborted to prevent misrouting.` +
           (allProjects.length > 0
-            ? `\n本机已知项目：\n` +
+            ? `\nKnown local projects:\n` +
               allProjects
                 .slice(0, 10)
                 .map((p) => `  - ${p.displayName || p.projectId} (${p.projectId}) -> ${p.primaryPath || ''}`)
                 .join('\n')
-            : '\n当前 projects.json 尚无已知项目映射。'),
+            : '\nNo project mappings are currently recorded in projects.json.'),
       );
       return;
     }
@@ -768,10 +768,10 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
     if (flags.json) {
       console.log(JSON.stringify(exportPayload, null, 2));
     } else {
-      console.log(`已归档交接包（仅导出模式）：${saved.filePath}`);
+      console.log(`Archived handoff bundle (export-only): ${saved.filePath}`);
       console.log(
-        `体量: ${formatBytes(bundleBytes)} (~${formatCompact(handoffEstimatedTokens)} tok) | ` +
-          `节省: ${savedPercent}% | 脱敏: ${redactionCount} 处`,
+        `Size: ${formatBytes(bundleBytes)} (~${formatCompact(handoffEstimatedTokens)} tok) | ` +
+          `Saved: ${savedPercent}% | Redactions: ${redactionCount}`,
       );
     }
     return;
@@ -785,7 +785,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
         handoffFilePath: saved.filePath,
         filename: saved.filename,
       },
-      `未检测到可用的 Antigravity agentapi，无法自动拉起新会话。\n交接包已安全归档至：${saved.filePath}`,
+      `Antigravity agentapi is unavailable; could not launch a new session automatically.\nHandoff bundle safely archived at: ${saved.filePath}`,
     );
     return;
   }
@@ -822,7 +822,7 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
         handoffFilePath: saved.filePath,
         filename: saved.filename,
       },
-      `拉起新会话失败：${startRes?.error || 'unknown error'}\n交接包已保留在：${saved.filePath}`,
+      `Failed to launch new session: ${startRes?.error || 'unknown error'}\nHandoff bundle preserved at: ${saved.filePath}`,
     );
     return;
   }
@@ -877,15 +877,15 @@ async function cmdRelay(flags, { defaultGo = false } = {}) {
     return;
   }
 
-  console.log(`已创建干净接力会话：${relayTitle}`);
-  console.log(`直达链接: ${launchPayload.conversationLink}`);
-  console.log(`目标目录: ${targetWorkspace || '(当前项目)'} (${targetProjectId || '-'})`);
-  console.log(`模型/模式: ${finalModel || '默认'} | ${launch.mode}`);
+  console.log(`Launched clean forked session: ${relayTitle}`);
+  console.log(`Direct link: ${launchPayload.conversationLink}`);
+  console.log(`Workspace:   ${targetWorkspace || '(current project)'} (${targetProjectId || '-'})`);
+  console.log(`Model/Mode:  ${finalModel || 'default'} | ${launch.mode}`);
   console.log(
-    `瘦身效果: ${formatCompact(originalPeakTokens)} → ~${formatCompact(handoffEstimatedTokens)} tok` +
-      `（节省 ${savedPercent}% | 脱敏 ${redactionCount} 处）`,
+    `Reduction:   ${formatCompact(originalPeakTokens)} → ~${formatCompact(handoffEstimatedTokens)} tok` +
+      ` (-${savedPercent}% | ${redactionCount} redaction(s))`,
   );
-  console.log(`档案路径: ${saved.filePath}`);
+  console.log(`Archive:     ${saved.filePath}`);
 }
 
 async function cmdServe(flags) {

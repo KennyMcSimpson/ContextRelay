@@ -147,7 +147,7 @@ function allocateFairSlices(texts, totalBudget) {
   }
   if (nonEmpty.length === 0) return out;
 
-  // 按长度升序分配，短文本拿满自身长度，盈余预算自动让渡给较长轮次
+  // Allocate in ascending length order: short texts keep full length, surplus flows to longer turns
   nonEmpty.sort((a, b) => a.text.length - b.text.length);
   let remainingBudget = totalBudget;
   let remainingItems = nonEmpty.length;
@@ -202,7 +202,7 @@ function buildSearchText({ title, workspacePath, filesModified, filesRead, turns
         : '',
     );
 
-    // 优先保证每一轮的 userText 都能进入索引（按 65% 预算均摊，短轮次盈余自动释放给回复）
+    // Prioritize indexing every turn's userText (65% budget split fairly; surplus flows to replies)
     const userTargetBudget = Math.floor(remainingBudget * 0.65);
     const userSlices = allocateFairSlices(userTexts, userTargetBudget);
     let usedUserChars = 0;
@@ -210,7 +210,7 @@ function buildSearchText({ title, workspacePath, filesModified, filesRead, turns
       if (s) usedUserChars += s.length + 1;
     }
 
-    // 剩余全部预算均摊覆盖关键回复与各轮助手总结
+    // Distribute all remaining budget fairly across key assistant replies and turn summaries
     const assistantBudget = Math.max(0, remainingBudget - usedUserChars);
     const assistantSlices = allocateFairSlices(assistantTexts, assistantBudget);
 
@@ -514,7 +514,7 @@ function isPathInsideDir(targetPath, rootDir) {
 }
 
 /**
- * 创建 Context Relay 持久化索引与档案存储实例。
+ * Create a persistent Context Relay index, lineage, and archive store instance.
  */
 export function createRelayStore({ dataDir, agentApi } = {}) {
   const resolvedDataDir = getDataDir(dataDir);
@@ -1092,7 +1092,7 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
     const candidates = [];
     const picked = new Set();
 
-    // 1. 优先查询显式指定的目标会话（例如当前宿主会话）
+    // 1. Prioritize explicitly requested target sessions (e.g., active host conversation)
     for (const id of explicitIds) {
       if (candidates.length >= safeLimit) break;
       const sess = indexSnap.sessions[id];
@@ -1107,7 +1107,7 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
       candidates.push(id);
     }
 
-    // 2. 剩余配额按最近活跃度补齐尚未拥有 projectId 且已过冷却期的会话
+    // 2. Fill remaining quota by recency for sessions lacking projectId whose cooldown has elapsed
     if (candidates.length < safeLimit) {
       const recentUnenriched = Object.values(indexSnap.sessions)
         .filter((sess) => {
@@ -1265,7 +1265,7 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
         ? { timeoutMs }
         : undefined;
 
-    // 顺序调用外部 agentapi 子进程（绝不在持锁期间阻塞）
+    // Invoke external agentapi child processes sequentially (never block while holding the file lock)
     const results = [];
     for (const id of candidates) {
       const attemptedAt = nowIso();
@@ -1335,7 +1335,7 @@ export function createRelayStore({ dataDir, agentApi } = {}) {
                 : activeApi.getConversationMetadata(id),
             );
 
-    // 异步顺序调用外部 agentapi，并在每次调用间让出事件循环防止阻塞主线程
+    // Call external agentapi sequentially and yield the event loop between calls to keep main thread responsive
     const results = [];
     for (let i = 0; i < candidates.length; i += 1) {
       const id = candidates[i];

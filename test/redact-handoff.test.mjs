@@ -31,8 +31,8 @@ function makeSyntheticSession(extraAssistantText = '') {
         sourceType: 'USER_INPUT',
         createdAt: '2026-11-24T10:00:00.000Z',
         model: 'gemini-2.5-pro',
-        userText: '请排查鉴权中间件并修复 token 刷新逻辑',
-        assistantText: `已修复 src/auth.mjs 中的过期边界判断。注意临时调试变量 ${secretLine}。${extraAssistantText}`,
+        userText: 'Investigate auth middleware and fix token refresh logic',
+        assistantText: `Fixed expiry boundary check in src/auth.mjs. Note temporary debug vars ${secretLine}.${extraAssistantText}`,
         deltaContextTokens: 12000,
         estimatedTurnTokens: 320,
         filesModified: ['E:/demo/project-alpha/src/auth.mjs'],
@@ -62,8 +62,8 @@ function makeSyntheticSession(extraAssistantText = '') {
         sourceType: 'USER_INPUT',
         createdAt: '2026-11-24T10:01:00.000Z',
         model: 'gemini-2.5-pro',
-        userText: '跑一下全量编译扫描日志',
-        assistantText: `扫描日志非常长：${'INFO verbose trace line 0123456789\n'.repeat(180)}`,
+        userText: 'Run full compiler scan and inspect logs',
+        assistantText: `Scan log is very long: ${'INFO verbose trace line 0123456789\n'.repeat(180)}`,
         deltaContextTokens: 25000,
         estimatedTurnTokens: 2200,
         filesModified: [],
@@ -93,8 +93,8 @@ function makeSyntheticSession(extraAssistantText = '') {
         sourceType: 'USER_INPUT',
         createdAt: '2026-11-24T10:02:00.000Z',
         model: 'gemini-2.5-pro',
-        userText: '补充测试并确认下一步需要做什么',
-        assistantText: '已新增 test/auth.test.mjs，剩余工作是把审计日志接入 Express 路由。',
+        userText: 'Add unit tests and confirm remaining next steps',
+        assistantText: 'Added test/auth.test.mjs; remaining work is wiring audit logging into Express routes.',
         deltaContextTokens: 11000,
         estimatedTurnTokens: 180,
         filesModified: ['E:/demo/project-alpha/test/auth.test.mjs'],
@@ -290,7 +290,7 @@ describe('handoff-builder: buildHandoffBundle & buildLaunchPrompt', () => {
       statusShort: ' M src/auth.mjs\n?? test/auth.test.mjs',
       diffStat: ' src/auth.mjs | 12 ++++++------',
     };
-    const extraInstruction = '请继续把审计日志接入 Express 中间件并补跑全部测试。';
+    const extraInstruction = 'Continue wiring audit logging into Express middleware and run all tests.';
 
     const redactedBundle = buildHandoffBundle(session, {
       selectedTurnIds: ['turn-1', 'turn-3'],
@@ -307,7 +307,7 @@ describe('handoff-builder: buildHandoffBundle & buildLaunchPrompt', () => {
     assert.ok(redactedBundle.markdown.includes('feat/auth-fix'), 'bundle must include gitAnchor branch');
     assert.ok(redactedBundle.markdown.includes('a1b2c3d'), 'bundle must include gitAnchor headSha');
     assert.ok(redactedBundle.markdown.includes(extraInstruction), 'bundle must include extraInstruction');
-    assert.ok(redactedBundle.markdown.includes('已剪除第 2 轮对话'), 'bundle must note pruned turn gap');
+    assert.ok(redactedBundle.markdown.includes('Pruned turn 2'), 'bundle must note pruned turn gap');
     assert.equal(redactedBundle.selectedTurnsCount, 2);
     assert.equal(redactedBundle.totalTurnsCount, 3);
     assert.equal(typeof redactedBundle.savedPercent, 'number');
@@ -352,8 +352,8 @@ describe('handoff-builder: buildHandoffBundle & buildLaunchPrompt', () => {
     });
     assert.ok(prunedBundle.totalItemsCount > prunedBundle.selectedItemsCount);
     assert.ok(
-      prunedBundle.markdown.includes('原文无损回溯索引'),
-      'pruned handoff bundle must include 「原文无损回溯索引」 section',
+      prunedBundle.markdown.includes('Lossless Verbatim Traceback Index'),
+      'pruned handoff bundle must include "Lossless Verbatim Traceback Index" section',
     );
     assert.ok(
       prunedBundle.markdown.includes(fullLogPath),
@@ -373,7 +373,7 @@ describe('handoff-builder: buildHandoffBundle & buildLaunchPrompt', () => {
     });
     assert.equal(fullBundle.selectedItemsCount, fullBundle.totalItemsCount);
     assert.equal(
-      fullBundle.markdown.includes('原文无损回溯索引'),
+      fullBundle.markdown.includes('Lossless Verbatim Traceback Index'),
       false,
       'traceback section should not appear when zero tool steps were folded',
     );
@@ -386,7 +386,7 @@ describe('handoff-builder: buildHandoffBundle & buildLaunchPrompt', () => {
 
     const inlineRes = buildLaunchPrompt({
       bundle: { markdown: shortMarkdown, bytes: shortBytes },
-      extraInstruction: '先运行现有测试确认基线',
+      extraInstruction: 'Run existing tests first to verify the baseline',
     });
     assert.equal(inlineRes.mode, 'inline');
     assert.equal(inlineRes.prompt, shortMarkdown);
@@ -403,7 +403,7 @@ describe('handoff-builder: buildHandoffBundle & buildLaunchPrompt', () => {
       bundle: { markdown: longMarkdown, bytes: longBytes },
       handoffFilePath,
       targetWorkspace: 'E:/demo/project-alpha',
-      extraInstruction: `请部署时核对 API_KEY=${secretApiKey} 与 ${secretGhp} 后继续任务`,
+      extraInstruction: `Verify API_KEY=${secretApiKey} and ${secretGhp} during deployment before resuming`,
     });
     assert.equal(fileRes.mode, 'file');
     const bootstrapBytes = Buffer.byteLength(fileRes.prompt, 'utf8');

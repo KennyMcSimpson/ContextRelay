@@ -145,7 +145,7 @@ function parseStatusOutput(statusRes) {
   if (allStatusLines.length > MAX_STATUS_LINES) {
     statusShort = [
       ...allStatusLines.slice(0, MAX_STATUS_LINES),
-      `... (共 ${allStatusLines.length} 项，已截断至前 ${MAX_STATUS_LINES} 行)`,
+      `... (${allStatusLines.length} total entries, truncated to first ${MAX_STATUS_LINES} lines)`,
     ].join('\n');
   } else {
     statusShort = allStatusLines.join('\n');

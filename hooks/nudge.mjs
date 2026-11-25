@@ -77,12 +77,12 @@ function computeTier({ peakContextTokens, noiseTokens, turnCount, tier1, tier2 }
 function buildUserMarkdown({ tier, peakContextTokens, noiseTokens }) {
   const peakLabel = formatK(peakContextTokens);
   const noisePart =
-    noiseTokens >= 10_000 ? `（含工具噪音约 **${formatK(noiseTokens)}**）` : '';
+    noiseTokens >= 10_000 ? ` (~**${formatK(noiseTokens)}** tool noise)` : '';
 
   if (tier >= 2) {
-    return `> **Context Relay**：当前上下文已达 **${peakLabel}**${noisePart}（高水位预警）— 敲 \`/fork\` 一键在当前目录去噪 Fork 新对话（不降智、旧对话保留），或敲 \`/compact\` 原地压缩。`;
+    return `> **Context Relay**: Context reached **${peakLabel}**${noisePart} (high-watermark alert) — run \`/fork\` for a clean denoised session in this folder (lossless, original preserved), or \`/compact\` to summarize in place.`;
   }
-  return `> **Context Relay**：当前上下文已达 **${peakLabel}**${noisePart} — 需要时敲 \`/fork\` 一键去噪 Fork 新对话，或敲 \`/compact\` 原地压缩。`;
+  return `> **Context Relay**: Context reached **${peakLabel}**${noisePart} — run \`/fork\` for a clean denoised session, or \`/compact\` to summarize in place.`;
 }
 
 function pruneStateMap(stateMap) {
@@ -136,7 +136,7 @@ function main() {
     if (!isSafeKey(rawConvId)) return;
     const conversationId = rawConvId.trim();
 
-    // 超快路径：仅读取 index.json 中该会话的缓存水位，绝不扫全盘
+    // Fast path: read only this session's cached watermark from index.json without scanning disk
     const dataDir = getDataDir();
     const indexPath = join(dataDir, 'index.json');
     const index = readJsonFile(indexPath, null);

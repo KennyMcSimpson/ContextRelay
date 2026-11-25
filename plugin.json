@@ -8,7 +8,7 @@
   "logo": "assets/logo.svg",
   "suggestedPrompts": [
     "/fork",
-    "/fork 换到另一个项目目录继续",
-    "/fork stats 看看帮我省了多少 token"
+    "/fork to another project workspace",
+    "/fork stats"
   ]
 }

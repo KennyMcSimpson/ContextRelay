@@ -95,11 +95,11 @@ async function main() {
           });
         }
       } catch {
-        // 轻量化项目发现失败不影响主同步流程
+        // Non-fatal lightweight project discovery failure must not block main sync
       }
     }
   } catch {
-    // 静默吞掉所有异常，绝不向 stdout 打印任何污染字符
+    // Silently swallow all exceptions; never emit stray output to stdout
   } finally {
     process.stdout.write('{}\n');
     process.exitCode = 0;

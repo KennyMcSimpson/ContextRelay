@@ -49,12 +49,12 @@
     if (!Number.isFinite(ts) || ts <= 0) return '—';
     const diff = Math.max(0, Date.now() - ts);
     const min = Math.floor(diff / 60_000);
-    if (min < 1) return '刚刚';
-    if (min < 60) return `${min} 分钟前`;
+    if (min < 1) return 'just now';
+    if (min < 60) return `${min}m ago`;
     const hr = Math.floor(min / 60);
-    if (hr < 24) return `${hr} 小时前`;
+    if (hr < 24) return `${hr}h ago`;
     const days = Math.floor(hr / 24);
-    if (days < 7) return `${days} 天前`;
+    if (days < 7) return `${days}d ago`;
     const d = new Date(ts);
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
@@ -65,7 +65,7 @@
 
   function shortPath(rawPath, segments = 2) {
     const clean = String(rawPath || '').trim().replace(/[\\/]+$/, '');
-    if (!clean) return '未关联目录';
+    if (!clean) return 'Unlinked workspace';
     const parts = clean.split(/[\\/]+/).filter(Boolean);
     if (parts.length <= segments) return clean;
     return `…/${parts.slice(-segments).join('/')}`;
@@ -86,9 +86,9 @@
 
   function tokenLevel(tokens) {
     const n = Number(tokens) || 0;
-    if (n >= 150_000) return { level: 'err', label: '降智预警' };
-    if (n >= 100_000) return { level: 'warn', label: '偏高' };
-    return { level: 'ok', label: '健康' };
+    if (n >= 150_000) return { level: 'err', label: 'High Risk' };
+    if (n >= 100_000) return { level: 'warn', label: 'Elevated' };
+    return { level: 'ok', label: 'Healthy' };
   }
 
   function normalizePathLower(p) {
@@ -262,14 +262,14 @@
       if (isSidecar && typeof window.sidecar?.ui?.toggleConversation === 'function') {
         try {
           await window.sidecar.ui.toggleConversation(cleanId);
-          showToast('已在 Antigravity 主壳切换至目标会话', 'success');
+          showToast('Switched to target session in Antigravity', 'success');
           return;
         } catch (err) {
           const copied = await copyToClipboard(cleanId);
           showToast(
             copied
-              ? `切换会话失败（${err?.message || '未知错误'}），已复制会话 ID`
-              : `切换会话失败：${err?.message || '未知错误'}`,
+              ? `Failed to switch session (${err?.message || 'unknown error'}); copied session ID`
+              : `Failed to switch session: ${err?.message || 'unknown error'}`,
             'warn',
             4200,
           );
@@ -280,12 +280,12 @@
       const copied = await copyToClipboard(cleanId);
       if (copied) {
         showToast(
-          `已复制会话 ID（${cleanId.slice(0, 12)}…）— 独立 Web 模式请在 Antigravity 中切换打开`,
+          `Copied session ID (${cleanId.slice(0, 12)}…) — open it in Antigravity`,
           'info',
           4000,
         );
       } else {
-        showToast(`会话 ID：${cleanId}`, 'info', 4000);
+        showToast(`Session ID: ${cleanId}`, 'info', 4000);
       }
     },
 
@@ -376,7 +376,7 @@
       document.documentElement.dataset.theme = theme;
       if (btnTheme) {
         btnTheme.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
-        btnTheme.title = theme === 'dark' ? '当前深色模式 — 点击切回浅色' : '当前浅色模式 — 点击切换深色';
+        btnTheme.title = theme === 'dark' ? 'Dark theme active — click for light' : 'Light theme active — click for dark';
       }
     };
 
@@ -414,7 +414,7 @@
       String(raw.displayName || raw.name || '').trim() ||
       fileBasename(primaryPath) ||
       projectId ||
-      '未命名项目';
+      'Untitled project';
     if (!projectId && !primaryPath) return null;
     return {
       projectId: projectId || primaryPath,
@@ -520,7 +520,7 @@
     return {
       id,
       index,
-      userText: String(raw?.userText || raw?.userSummary || '(无用户输入摘要)'),
+      userText: String(raw?.userText || raw?.userSummary || '(no user prompt summary)'),
       assistantText: String(raw?.assistantText || raw?.assistantSummary || ''),
       deltaTokens,
       estimatedTurnTokens: Number(raw?.estimatedTurnTokens ?? raw?.estimatedTokens ?? 0) || 0,
@@ -558,7 +558,7 @@
 
     return {
       sessionId,
-      title: String(raw.title || `会话 ${sessionId.slice(0, 8)}`),
+      title: String(raw.title || `Session ${sessionId.slice(0, 8)}`),
       projectId: String(raw.projectId || ''),
       workspacePath: String(raw.workspacePath || raw.primaryPath || ''),
       lastModel: String(raw.lastModel || raw.model || raw.firstModel || ''),
@@ -814,8 +814,8 @@
       displayName: match
         ? match.displayName
         : sessionWs
-          ? `${fileBasename(sessionWs)}（当前会话）`
-          : '沿用当前会话目录',
+          ? `${fileBasename(sessionWs)} (current session)`
+          : 'Keep current session workspace',
     };
   }
 
@@ -868,7 +868,7 @@
     } catch (err) {
       state.previewLoading = false;
       renderLaunchpadTelemetry();
-      showToast(`预览计算失败：${err?.message || '网络错误'}`, 'error');
+      showToast(`Preview failed: ${err?.message || 'network error'}`, 'error');
       return null;
     }
   }
@@ -998,7 +998,7 @@
     } catch (err) {
       $('surgery-loading')?.classList.add('hidden');
       renderSurgeryView();
-      showToast(`初始化载入失败：${err?.message || '服务未响应'}`, 'error', 4200);
+      showToast(`Initial load failed: ${err?.message || 'server did not respond'}`, 'error', 4200);
     }
   }
 
@@ -1063,7 +1063,7 @@
         window.scrollTo(0, 0);
       }
     } catch (err) {
-      showToast(`载入会话失败：${err?.message || '未知错误'}`, 'error');
+      showToast(`Failed to load session: ${err?.message || 'unknown error'}`, 'error');
     }
   }
 
@@ -1097,7 +1097,7 @@
       renderSessionsRadar();
     } catch (err) {
       state.radar.loading = false;
-      showToast(`获取会话列表失败：${err?.message || '未知错误'}`, 'error');
+      showToast(`Failed to list sessions: ${err?.message || 'unknown error'}`, 'error');
     }
   }
 
@@ -1115,7 +1115,7 @@
       }
     } catch (err) {
       if (!silent) {
-        showToast(`加载血缘与档案失败：${err?.message || '未知错误'}`, 'error');
+        showToast(`Failed to load lineage and archives: ${err?.message || 'unknown error'}`, 'error');
       }
     }
   }
@@ -1151,9 +1151,9 @@
       await loadLineage({ silent: true });
 
       const added = Number(res?.sync?.indexed ?? res?.sync?.updated ?? 0);
-      showToast(added > 0 ? `索引刷新完成（更新 ${added} 条会话）` : '索引与项目列表已刷新', 'success');
+      showToast(added > 0 ? `Index refreshed (${added} session(s) updated)` : 'Index and project list refreshed', 'success');
     } catch (err) {
-      showToast(`刷新索引失败：${err?.message || '未知错误'}`, 'error');
+      showToast(`Index refresh failed: ${err?.message || 'unknown error'}`, 'error');
     } finally {
       state.syncing = false;
       if (btnSync) {
@@ -1208,15 +1208,15 @@
           ? res.content
           : typeof res?.step?.content === 'string'
             ? res.step.content
-            : '(该步骤全文为空)';
+            : '(full step content is empty)';
 
       state.fullStepCache.set(cacheKey, content);
       state.expandFullStepIds.add(stepKey);
       state.visibleFullSteps.add(cacheKey);
-      showToast(`已载入 step#${item.stepIndex} 全文并纳入交接包`, 'success');
+      showToast(`Loaded full step#${item.stepIndex} and included it in bundle`, 'success');
       schedulePreview();
     } catch (err) {
-      showToast(`展开全文失败：${err?.message || '未找到完整日志'}`, 'error');
+      showToast(`Failed to expand step: ${err?.message || 'full transcript not found'}`, 'error');
     } finally {
       state.loadingFullSteps.delete(cacheKey);
       renderPresetButtons();
@@ -1232,7 +1232,7 @@
   async function handleLaunch() {
     if (state.launching) return;
     if (!isSidecar || !state.agentApiAvailable) {
-      showToast('需在 Antigravity 侧栏内一键启动新会话；请改用「复制交接包」或「导出 MD」', 'warn', 4000);
+      showToast('One-click launch requires the Antigravity sidebar; use Copy Bundle or Export MD instead', 'warn', 4000);
       return;
     }
 
@@ -1240,19 +1240,19 @@
     if (!basePayload) return;
 
     if (basePayload.selectedTurnIds.length === 0) {
-      showToast('请至少勾选 1 轮对话后再启动接力会话', 'warn');
+      showToast('Select at least 1 turn before launching a new session', 'warn');
       return;
     }
 
     const target = getSelectedTargetProject();
     const model = ($('lp-model')?.value || '').trim() || state.currentSession?.lastModel || 'pro';
-    const title = ($('lp-title')?.value || '').trim() || `[Relay] ${state.currentSession?.title || '新会话'}`;
+    const title = ($('lp-title')?.value || '').trim() || `[Relay] ${state.currentSession?.title || 'New session'}`;
 
     state.launching = true;
     const btn = $('btn-launch');
     if (btn) {
       btn.disabled = true;
-      btn.lastElementChild.textContent = '正在拉起新会话…';
+      btn.lastElementChild.textContent = 'Launching…';
     }
 
     try {
@@ -1265,9 +1265,9 @@
         mode: 'auto',
       });
 
-      const modeText = res?.launchMode === 'file' ? '落盘移交' : '直传内联';
-      const savedText = typeof res?.savedPercent === 'number' ? `减负 ${Math.round(res.savedPercent)}%` : '已剪枝';
-      showToast(`新会话已启动（${savedText} · ${modeText}）`, 'success', 4200);
+      const modeText = res?.launchMode === 'file' ? 'file handoff' : 'inline';
+      const savedText = typeof res?.savedPercent === 'number' ? `-${Math.round(res.savedPercent)}%` : 'pruned';
+      showToast(`New session launched (${savedText} · ${modeText})`, 'success', 4200);
 
       loadLineage({ silent: true });
 
@@ -1275,11 +1275,11 @@
         await HostBridge.openConversation(res.conversationId);
       }
     } catch (err) {
-      showToast(`启动新会话失败：${err?.message || '宿主接口报错'}`, 'error', 4800);
+      showToast(`Failed to launch new session: ${err?.message || 'host API error'}`, 'error', 4800);
     } finally {
       state.launching = false;
       if (btn) {
-        btn.lastElementChild.textContent = '启动新会话并跳转';
+        btn.lastElementChild.textContent = 'Launch & Open Session';
       }
       updateLaunchpadCapabilities();
     }
@@ -1293,18 +1293,18 @@
       !state.latestBundle;
     const bundle = needsFresh ? await runPreviewNow() : state.latestBundle;
     if (!bundle || !bundle.markdown) {
-      showToast('当前没有可复制的交接包内容', 'warn');
+      showToast('No handoff bundle content to copy', 'warn');
       return;
     }
 
     const ok = await copyToClipboard(bundle.markdown);
     if (ok) {
       showToast(
-        `已复制交接包（${fmtBytes(bundle.bytes)} · ~${fmtTokens(bundle.estimatedTokens)} tokens）`,
+        `Copied handoff bundle (${fmtBytes(bundle.bytes)} · ~${fmtTokens(bundle.estimatedTokens)} tokens)`,
         'success',
       );
     } else {
-      showToast('剪贴板写入被拒绝，请点击「预览」手动复制', 'warn');
+      showToast('Clipboard write blocked; click Preview to copy manually', 'warn');
     }
   }
 
@@ -1315,17 +1315,17 @@
     const badges = [
       { text: fmtBytes(bundle.bytes), cls: '' },
       { text: `~${fmtTokens(bundle.estimatedTokens)} tokens`, cls: '' },
-      { text: `减负 ${bundle.savedPercent}%`, cls: 'pill-ok' },
+      { text: `-${bundle.savedPercent}%`, cls: 'pill-ok' },
     ];
     if (bundle.redactionCount > 0) {
-      badges.push({ text: `脱敏 ${bundle.redactionCount} 处`, cls: 'pill-redact' });
+      badges.push({ text: `${bundle.redactionCount} redacted`, cls: 'pill-redact' });
     }
     if (bundle.recommendFileMode) {
-      badges.push({ text: '>10 KB 自动落盘移交', cls: 'pill-warn' });
+      badges.push({ text: '>10 KB file handoff', cls: 'pill-warn' });
     }
 
     openModal({
-      title: `交接包预览 — ${state.currentSession?.title || ''}`,
+      title: `Handoff Preview — ${state.currentSession?.title || ''}`,
       content: bundle.markdown,
       badges,
       filePath: state.currentSession?.workspacePath || '',
@@ -1349,10 +1349,10 @@
       });
 
       const fname = res?.filename || fileBasename(res?.filePath) || 'handoff.md';
-      showToast(`已导出 ${fname}（${fmtBytes(res?.bytes || 0)}）`, 'success', 4200);
+      showToast(`Exported ${fname} (${fmtBytes(res?.bytes || 0)})`, 'success', 4200);
       loadLineage({ silent: true });
     } catch (err) {
-      showToast(`导出 Markdown 失败：${err?.message || '写入错误'}`, 'error');
+      showToast(`Failed to export Markdown: ${err?.message || 'write error'}`, 'error');
     } finally {
       state.exporting = false;
       if (btn) btn.disabled = false;
@@ -1370,7 +1370,7 @@
 
       if (copyOnly) {
         const ok = await copyToClipboard(content);
-        showToast(ok ? `已复制档案 ${clean}` : '复制失败，请预览后手动复制', ok ? 'success' : 'warn');
+        showToast(ok ? `Copied archive ${clean}` : 'Copy failed; open preview to copy manually', ok ? 'success' : 'warn');
         return;
       }
 
@@ -1381,7 +1381,7 @@
         filePath: res?.filePath || '',
       });
     } catch (err) {
-      showToast(`读取档案失败：${err?.message || '文件不存在'}`, 'error');
+      showToast(`Failed to read archive: ${err?.message || 'file not found'}`, 'error');
     }
   }
 
@@ -1420,19 +1420,19 @@
     if (btnLaunch) {
       btnLaunch.disabled = !canLaunch || state.launching;
       if (!isSidecar) {
-        btnLaunch.title = '需在 Antigravity 侧栏内一键启动新会话；独立 Web 模式请使用「复制交接包」或「导出 MD」';
+        btnLaunch.title = 'One-click launch requires the Antigravity sidebar; in standalone web mode use Copy Bundle or Export MD';
       } else if (!state.agentApiAvailable) {
-        btnLaunch.title = '当前宿主未暴露 Agent API，请改用「复制交接包」或「导出 MD」';
+        btnLaunch.title = 'Host Agent API is unavailable; use Copy Bundle or Export MD instead';
       } else {
-        btnLaunch.title = '自动剪枝并启动新会话，完成后立即跳转';
+        btnLaunch.title = 'Prune context, launch a clean session, and jump straight to it';
       }
     }
     if (hint) {
       if (!isSidecar) {
-        hint.textContent = '独立 Web 模式不支持一键拉起宿主会话，已高亮「复制交接包」与「导出 MD」。';
+        hint.textContent = 'Standalone web mode cannot launch host sessions directly. Use Copy Bundle or Export MD.';
         hint.classList.remove('hidden');
       } else if (!state.agentApiAvailable) {
-        hint.textContent = '未检测到宿主 Agent API，请使用「复制交接包」或「导出 MD」接力。';
+        hint.textContent = 'Host Agent API not detected. Use Copy Bundle or Export MD to hand off.';
         hint.classList.remove('hidden');
       } else {
         hint.classList.add('hidden');
@@ -1452,7 +1452,7 @@
       if (!matched) {
         const fallbackOpt = document.createElement('option');
         fallbackOpt.value = '';
-        fallbackOpt.textContent = '沿用当前会话目录（未在已知项目列表）';
+        fallbackOpt.textContent = 'Keep current session workspace (unlisted)';
         lpSelect.appendChild(fallbackOpt);
       }
 
@@ -1484,7 +1484,7 @@
       radarSelect.innerHTML = '';
       const allOpt = document.createElement('option');
       allOpt.value = '';
-      allOpt.textContent = '全部项目';
+      allOpt.textContent = 'All Projects';
       radarSelect.appendChild(allOpt);
 
       for (const p of state.projects) {
@@ -1525,7 +1525,7 @@
       radarModel.innerHTML = '';
       const allOpt = document.createElement('option');
       allOpt.value = '';
-      allOpt.textContent = '全部模型';
+      allOpt.textContent = 'All Models';
       radarModel.appendChild(allOpt);
 
       for (const m of state.models) {
@@ -1584,17 +1584,17 @@
     const pathEl = $('health-path');
     if (pathEl) {
       pathEl.textContent = shortPath(sess.workspacePath, 2);
-      pathEl.title = sess.workspacePath || '未记录工作区路径';
+      pathEl.title = sess.workspacePath || 'Workspace path not recorded';
     }
 
     const modelEl = $('health-model');
     if (modelEl) {
-      modelEl.textContent = sess.lastModel || '未知模型';
+      modelEl.textContent = sess.lastModel || 'Unknown model';
       modelEl.title =
-        sess.modelsUsed.length > 1 ? `使用过的模型：${sess.modelsUsed.join(', ')}` : modelEl.textContent;
+        sess.modelsUsed.length > 1 ? `Models used: ${sess.modelsUsed.join(', ')}` : modelEl.textContent;
     }
 
-    // "在主壳打开" shown when viewing a session different from host current conversation
+    // "Open in Host" shown when viewing a session different from host current conversation
     const btnHost = $('btn-open-host');
     if (btnHost) {
       const showOpenBtn = Boolean(
@@ -1602,7 +1602,7 @@
           (!state.hostConversationId || sess.sessionId !== state.hostConversationId),
       );
       btnHost.classList.toggle('hidden', !showOpenBtn);
-      btnHost.textContent = isSidecar ? '在主壳打开' : '复制会话 ID';
+      btnHost.textContent = isSidecar ? 'Open in Host' : 'Copy Session ID';
     }
 
     // Waterline bar
@@ -1620,7 +1620,7 @@
     }
 
     const turnsEl = $('waterline-turns');
-    if (turnsEl) turnsEl.textContent = `${sess.turns.length} 轮`;
+    if (turnsEl) turnsEl.textContent = `${sess.turns.length} turn${sess.turns.length === 1 ? '' : 's'}`;
 
     const fillEl = $('waterline-fill');
     if (fillEl) {
@@ -1646,17 +1646,17 @@
         const dirtyEl = $('git-dirty');
         if (dirtyEl) {
           if (dirty > 0) {
-            dirtyEl.textContent = `${dirty} 个脏文件`;
+            dirtyEl.textContent = `${dirty} dirty`;
             dirtyEl.className = 'pill pill-warn mono';
           } else {
-            dirtyEl.textContent = '工作区干净';
+            dirtyEl.textContent = 'Clean tree';
             dirtyEl.className = 'pill pill-ok';
           }
         }
 
         const tipLines = [];
-        if (g.repoRoot) tipLines.push(`仓库: ${g.repoRoot}`);
-        if (g.headSubject) tipLines.push(`提交: ${g.headSubject}`);
+        if (g.repoRoot) tipLines.push(`Repo: ${g.repoRoot}`);
+        if (g.headSubject) tipLines.push(`HEAD: ${g.headSubject}`);
         if (g.statusShort) tipLines.push(`\n${g.statusShort}`);
         gitBar.title = tipLines.join('\n');
       } else {
@@ -1686,8 +1686,8 @@
     section.classList.remove('hidden');
     const modEl = $('files-mod-count');
     const readEl = $('files-read-count');
-    if (modEl) modEl.textContent = `已修改 ${modified.length}`;
-    if (readEl) readEl.textContent = `已读取 ${read.length}`;
+    if (modEl) modEl.textContent = `Modified ${modified.length}`;
+    if (readEl) readEl.textContent = `Read ${read.length}`;
 
     const toggleBtn = $('btn-toggle-files');
     const bodyEl = $('files-body');
@@ -1707,7 +1707,7 @@
     for (const entry of combined) {
       const chip = document.createElement('span');
       chip.className = `file-chip mono${entry.modified ? ' is-modified' : ''}`;
-      chip.title = `${entry.modified ? '[已修改] ' : '[已读取] '}${entry.path}`;
+      chip.title = `${entry.modified ? '[Modified] ' : '[Read] '}${entry.path}`;
 
       const dot = document.createElement('span');
       dot.className = 'file-dot';
@@ -1738,12 +1738,12 @@
     }
 
     if (statEl) {
-      statEl.textContent = `已选 ${state.selectedTurnIds.size}/${turns.length} 轮 · ${selectedItemsInSelectedTurns} 步`;
+      statEl.textContent = `Selected ${state.selectedTurnIds.size}/${turns.length} turns · ${selectedItemsInSelectedTurns} steps`;
     }
 
     if (turns.length === 0) {
       listEl.innerHTML =
-        '<div class="card empty-state"><p class="empty-desc">该会话暂无可展示的对话轮次。</p></div>';
+        '<div class="card empty-state"><p class="empty-desc">No conversation turns available in this session.</p></div>';
       return;
     }
 
@@ -1771,19 +1771,19 @@
         const pickedInTurn = turn.items.filter((it) => state.selectedItemIds.has(it.id)).length;
         const badges = [];
         if (turn.counts.edit > 0) {
-          badges.push(`<span class="pill pill-edit mono">改 ${turn.counts.edit}</span>`);
+          badges.push(`<span class="pill pill-edit mono">Edit ${turn.counts.edit}</span>`);
         }
         if (turn.counts.read > 0) {
-          badges.push(`<span class="pill pill-read mono">读 ${turn.counts.read}</span>`);
+          badges.push(`<span class="pill pill-read mono">Read ${turn.counts.read}</span>`);
         }
         if (turn.counts.command > 0) {
-          badges.push(`<span class="pill pill-cmd mono">命令 ${turn.counts.command}</span>`);
+          badges.push(`<span class="pill pill-cmd mono">Cmd ${turn.counts.command}</span>`);
         }
         if (turn.counts.error > 0) {
-          badges.push(`<span class="pill pill-err mono">错误 ${turn.counts.error}</span>`);
+          badges.push(`<span class="pill pill-err mono">Err ${turn.counts.error}</span>`);
         }
         if (badges.length === 0) {
-          badges.push(`<span class="pill mono">工具 ${turn.items.length}</span>`);
+          badges.push(`<span class="pill mono">Tools ${turn.items.length}</span>`);
         }
 
         let itemsHtml = '';
@@ -1821,11 +1821,11 @@
             let expandBtnHtml = '';
             if (item.isTruncated && item.stepIndex !== null) {
               const btnLabel = isFullLoading
-                ? '载入中…'
+                ? 'Loading…'
                 : isFullIncluded && isFullVisible
-                  ? '已含全文'
-                  : '展开全文';
-              expandBtnHtml = `<button class="btn-expand-full${isFullIncluded && isFullVisible ? ' is-active' : ''}" type="button" data-action="expand-full" data-turn-id="${turnIdEsc}" data-item-id="${itemIdEsc}"${isFullLoading ? ' disabled' : ''} title="从完整日志按需加载 step#${item.stepIndex} 原文并纳入交接包">${escapeHtml(btnLabel)}</button>`;
+                  ? 'Full Included'
+                  : 'Expand Full';
+              expandBtnHtml = `<button class="btn-expand-full${isFullIncluded && isFullVisible ? ' is-active' : ''}" type="button" data-action="expand-full" data-turn-id="${turnIdEsc}" data-item-id="${itemIdEsc}"${isFullLoading ? ' disabled' : ''} title="Load full raw output for step#${item.stepIndex} from transcript_full.jsonl and include in bundle">${escapeHtml(btnLabel)}</button>`;
             }
 
             let fullBoxHtml = '';
@@ -1834,8 +1834,8 @@
               fullBoxHtml = `
                 <div class="item-full-box">
                   <div class="item-full-head mono">
-                    <span>step#${item.stepIndex} 完整输出（${escapeHtml(fmtBytes(utf8ByteLength(fullText)))}）</span>
-                    <span>已纳入交接包</span>
+                    <span>step#${item.stepIndex} full output (${escapeHtml(fmtBytes(utf8ByteLength(fullText)))})</span>
+                    <span>Included in bundle</span>
                   </div>
                   <pre class="item-full-pre">${escapeHtml(fullText)}</pre>
                 </div>`;
@@ -1844,7 +1844,7 @@
             rows.push(`
               <div class="item-row${itemChecked && isTurnChecked ? '' : ' is-unchecked'}">
                 <div class="item-main">
-                  <input class="item-check" type="checkbox" data-action="toggle-item" data-turn-id="${turnIdEsc}" data-item-id="${itemIdEsc}"${itemChecked ? ' checked' : ''} aria-label="勾选步骤 ${escapeHtml(item.toolName)}" />
+                  <input class="item-check" type="checkbox" data-action="toggle-item" data-turn-id="${turnIdEsc}" data-item-id="${itemIdEsc}"${itemChecked ? ' checked' : ''} aria-label="Toggle step ${escapeHtml(item.toolName)}" />
                   <div class="item-info">
                     <div class="item-top-line">
                       <span class="${toolKindCls}">${escapeHtml(item.toolName)}</span>
@@ -1852,7 +1852,7 @@
                     </div>
                   </div>
                   <div class="item-right">
-                    ${bytesText ? `<span class="${bytesCls}" title="输出大小">${escapeHtml(bytesText)}</span>` : ''}
+                    ${bytesText ? `<span class="${bytesCls}" title="Output size">${escapeHtml(bytesText)}</span>` : ''}
                     ${expandBtnHtml}
                   </div>
                 </div>
@@ -1869,7 +1869,7 @@
                 <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>
                 ${badges.join('')}
               </span>
-              <span class="turn-tools-selected mono">已选 ${pickedInTurn}/${turn.items.length}</span>
+              <span class="turn-tools-selected mono">Kept ${pickedInTurn}/${turn.items.length}</span>
             </button>
             ${itemsHtml}
           </div>`;
@@ -1890,7 +1890,7 @@
         <article class="turn-card${isTurnChecked ? '' : ' is-unchecked'}" role="listitem" data-turn-id="${turnIdEsc}">
           <div class="turn-head">
             <div class="turn-check-wrap">
-              <input class="turn-check" type="checkbox" data-action="toggle-turn" data-turn-id="${turnIdEsc}"${isTurnChecked ? ' checked' : ''} aria-label="勾选第 ${turn.index} 轮" />
+              <input class="turn-check" type="checkbox" data-action="toggle-turn" data-turn-id="${turnIdEsc}"${isTurnChecked ? ' checked' : ''} aria-label="Select turn ${turn.index}" />
               <span class="turn-idx mono">#${turn.index}</span>
             </div>
             <div class="turn-user-col">
@@ -1898,12 +1898,12 @@
             </div>
             <div class="turn-right">
               <div class="turn-right-top">
-                <span class="${deltaCls}" title="本轮上下文增量体积">${escapeHtml(deltaLabel)}</span>
-                <button class="btn-cutoff" type="button" data-action="cutoff-turn" data-turn-index="${turn.index}" title="仅保留至第 #${turn.index} 轮，移除之后全部轮次">截断至此</button>
+                <span class="${deltaCls}" title="Context delta for this turn">${escapeHtml(deltaLabel)}</span>
+                <button class="btn-cutoff" type="button" data-action="cutoff-turn" data-turn-index="${turn.index}" title="Keep turns through #${turn.index} and drop all later turns">Cut here</button>
               </div>
-              <div class="noise-bar-wrap" title="噪声输出占比约 ${noisePct}%">
+              <div class="noise-bar-wrap" title="Estimated tool noise ratio: ${noisePct}%">
                 <div class="noise-track"><div class="${noiseCls}" style="width:${noisePct}%;"></div></div>
-                <span class="noise-label mono">噪 ${noisePct}%</span>
+                <span class="noise-label mono">Noise ${noisePct}%</span>
               </div>
             </div>
           </div>
@@ -1930,7 +1930,7 @@
     if (!b) {
       const peak = state.currentSession?.peakContextTokens || 0;
       if (slimText) {
-        slimText.textContent = peak > 0 ? `原峰值 ${fmtTokens(peak)} → 计算中…` : '等待裁剪预览…';
+        slimText.textContent = peak > 0 ? `Peak ${fmtTokens(peak)} → Calculating…` : 'Waiting for preview…';
       }
       savedBadge?.classList.add('hidden');
       redactBadge?.classList.add('hidden');
@@ -1942,12 +1942,12 @@
     }
 
     if (slimText) {
-      slimText.textContent = `原峰值 ${fmtTokens(b.originalPeakTokens)} → 裁剪后 ~${fmtTokens(b.estimatedTokens)}`;
+      slimText.textContent = `Peak ${fmtTokens(b.originalPeakTokens)} → Pruned ~${fmtTokens(b.estimatedTokens)}`;
     }
 
     if (savedBadge) {
       if (b.originalPeakTokens > 0) {
-        savedBadge.textContent = `减负 ${b.savedPercent}%`;
+        savedBadge.textContent = `Saved ${b.savedPercent}%`;
         savedBadge.classList.remove('hidden');
       } else {
         savedBadge.classList.add('hidden');
@@ -1956,7 +1956,7 @@
 
     if (redactBadge) {
       if (b.redactionCount > 0) {
-        redactBadge.textContent = `脱敏 ${b.redactionCount} 处`;
+        redactBadge.textContent = `${b.redactionCount} redacted`;
         redactBadge.classList.remove('hidden');
       } else {
         redactBadge.classList.add('hidden');
@@ -1966,10 +1966,10 @@
     if (modeBadge) {
       const limitKb = Math.round((b.inlineLimitBytes || 10240) / 1024);
       if (b.recommendFileMode) {
-        modeBadge.textContent = `${fmtBytes(b.bytes)} · >${limitKb} KB 自动落盘移交`;
+        modeBadge.textContent = `${fmtBytes(b.bytes)} · >${limitKb} KB file handoff`;
         modeBadge.className = 'pill pill-mode is-file mono';
       } else {
-        modeBadge.textContent = `${fmtBytes(b.bytes)} · 直传内联`;
+        modeBadge.textContent = `${fmtBytes(b.bytes)} · inline`;
         modeBadge.className = 'pill pill-mode mono';
       }
     }
@@ -1987,16 +1987,16 @@
     resetBtn?.classList.toggle('hidden', !hasFilters);
 
     if (countEl) {
-      countEl.textContent = `共 ${state.radar.total} 条会话${
-        state.radar.sessions.length < state.radar.total ? `（展示前 ${state.radar.sessions.length} 条）` : ''
+      countEl.textContent = `${state.radar.total} session${state.radar.total === 1 ? '' : 's'}${
+        state.radar.sessions.length < state.radar.total ? ` (showing first ${state.radar.sessions.length})` : ''
       }`;
     }
 
     if (state.radar.sessions.length === 0) {
       listEl.innerHTML = `
         <div class="card empty-state" style="grid-column: 1 / -1;">
-          <h3 class="empty-title">没有匹配的会话</h3>
-          <p class="empty-desc">尝试放宽搜索关键词、切换项目筛选或点击顶部刷新索引。</p>
+          <h3 class="empty-title">No matching sessions</h3>
+          <p class="empty-desc">Try broadening your search query, changing the project filter, or refreshing the index.</p>
         </div>`;
       return;
     }
@@ -2009,9 +2009,9 @@
       const { level } = tokenLevel(s.peakContextTokens);
 
       const badges = [];
-      if (isCurrentSurgery) badges.push('<span class="pill pill-edit">手术中</span>');
-      if (isHostCurrent) badges.push('<span class="pill pill-ok">当前</span>');
-      if (s.isSubagent) badges.push('<span class="pill pill-warn">子代理</span>');
+      if (isCurrentSurgery) badges.push('<span class="pill pill-edit">In Surgery</span>');
+      if (isHostCurrent) badges.push('<span class="pill pill-ok">Current</span>');
+      if (s.isSubagent) badges.push('<span class="pill pill-warn">Subagent</span>');
 
       parts.push(`
         <article class="card session-card${isCurrentSurgery ? ' is-current-surgery' : ''}" role="listitem" data-session-id="${sidEsc}">
@@ -2019,16 +2019,16 @@
             <h3 class="session-title" title="${escapeHtml(s.title)}">${escapeHtml(s.title)}</h3>
             <div class="session-badges">${badges.join('')}</div>
           </div>
-          <div class="session-path mono" title="${escapeHtml(s.workspacePath || '未记录目录')}">${escapeHtml(shortPath(s.workspacePath, 2))}</div>
+          <div class="session-path mono" title="${escapeHtml(s.workspacePath || 'Workspace not recorded')}">${escapeHtml(shortPath(s.workspacePath, 2))}</div>
           <div class="session-meta">
-            <span class="pill pill-model mono">${escapeHtml(s.lastModel || '未知模型')}</span>
-            <span class="mono">${s.turnCount} 轮</span>
-            <span class="pill pill-${level} mono" title="上下文峰值 token">${escapeHtml(fmtTokens(s.peakContextTokens))}</span>
+            <span class="pill pill-model mono">${escapeHtml(s.lastModel || 'Unknown model')}</span>
+            <span class="mono">${s.turnCount} turns</span>
+            <span class="pill pill-${level} mono" title="Peak context tokens">${escapeHtml(fmtTokens(s.peakContextTokens))}</span>
             <span>${escapeHtml(fmtRelTime(s.updatedAt))}</span>
           </div>
           <div class="session-actions">
-            <button class="btn btn-primary" type="button" data-action="load-surgery" data-session-id="${sidEsc}">送入手术台</button>
-            <button class="btn btn-ghost" type="button" data-action="open-session" data-session-id="${sidEsc}">${isSidecar ? '打开会话' : '复制 ID'}</button>
+            <button class="btn btn-primary" type="button" data-action="load-surgery" data-session-id="${sidEsc}">Load in Surgery</button>
+            <button class="btn btn-ghost" type="button" data-action="open-session" data-session-id="${sidEsc}">${isSidecar ? 'Open Session' : 'Copy ID'}</button>
           </div>
         </article>`);
     }
@@ -2042,34 +2042,34 @@
     const lineageCount = $('lineage-count');
     const archivesCount = $('archives-count');
 
-    if (lineageCount) lineageCount.textContent = `${state.lineage.length} 条记录`;
-    if (archivesCount) archivesCount.textContent = `${state.archives.length} 份档案`;
+    if (lineageCount) lineageCount.textContent = `${state.lineage.length} record${state.lineage.length === 1 ? '' : 's'}`;
+    if (archivesCount) archivesCount.textContent = `${state.archives.length} archive${state.archives.length === 1 ? '' : 's'}`;
 
     if (lineageList) {
       if (state.lineage.length === 0) {
         lineageList.innerHTML = `
           <div class="card empty-state">
-            <h3 class="empty-title">暂无交接血缘记录</h3>
-            <p class="empty-desc">在「手术台」一键启动新会话后，源会话与接力会话的减负链路会自动记录在此。</p>
+            <h3 class="empty-title">No handoff lineage yet</h3>
+            <p class="empty-desc">Launch a clean session from Surgery to automatically track token reduction and parent-child lineage here.</p>
           </div>`;
       } else {
         const parts = [];
         for (const rec of state.lineage) {
           const srcId = String(rec.sourceSessionId || rec.parentSessionId || '');
-          const srcTitle = String(rec.sourceTitle || (srcId ? `会话 ${srcId.slice(0, 8)}` : '源会话'));
+          const srcTitle = String(rec.sourceTitle || (srcId ? `Session ${srcId.slice(0, 8)}` : 'Source session'));
           const srcPeak = Number(rec.originalPeakTokens ?? rec.sourcePeakTokens ?? 0) || 0;
           const estTokens = Number(rec.estimatedTokens) || 0;
           const srcSubText =
             srcPeak > 0
-              ? `源 · ${fmtTokens(srcPeak)} tokens`
+              ? `Source · ${fmtTokens(srcPeak)} tokens`
               : estTokens > 0
-                ? `源 · 裁剪后 ~${fmtTokens(estTokens)} tokens`
-                : `源 · ${shortPath(rec.sourceWorkspacePath || '', 2)}`;
+                ? `Source · pruned ~${fmtTokens(estTokens)} tokens`
+                : `Source · ${shortPath(rec.sourceWorkspacePath || '', 2)}`;
           const dstId = String(rec.targetSessionId || rec.childSessionId || rec.conversationId || '');
-          const dstTitle = String(rec.targetTitle || rec.title || (dstId ? `新会话 ${dstId.slice(0, 8)}` : '接力会话'));
+          const dstTitle = String(rec.targetTitle || rec.title || (dstId ? `Session ${dstId.slice(0, 8)}` : 'Forked session'));
           const dstDir = String(rec.targetWorkspace || rec.targetProjectName || '');
           const savedPct = Math.round(Number(rec.savedPercent) || 0);
-          const modeLabel = (rec.launchMode || rec.mode) === 'file' ? '落盘' : '内联';
+          const modeLabel = (rec.launchMode || rec.mode) === 'file' ? 'File' : 'Inline';
           const archiveFile = String(
             rec.handoffFilename || (rec.handoffFilePath ? fileBasename(rec.handoffFilePath) : ''),
           );
@@ -2077,18 +2077,18 @@
           parts.push(`
             <article class="card lineage-card">
               <div class="lineage-flow">
-                <button class="lineage-node" type="button" data-action="lineage-open-source" data-session-id="${escapeHtml(srcId)}" title="送入手术台或跳转源会话">
+                <button class="lineage-node" type="button" data-action="lineage-open-source" data-session-id="${escapeHtml(srcId)}" title="Load source session into Surgery">
                   <span class="lineage-node-text">
                     <span class="lineage-node-title">${escapeHtml(srcTitle)}</span>
                     <span class="lineage-node-sub mono">${escapeHtml(srcSubText)}</span>
                   </span>
                 </button>
                 <div class="lineage-arrow">
-                  <span class="pill pill-ok mono">减负 ${savedPct}%</span>
+                  <span class="pill pill-ok mono">-${savedPct}%</span>
                   <span class="pill mono">${escapeHtml(modeLabel)}</span>
                   <span aria-hidden="true">→</span>
                 </div>
-                <button class="lineage-node" type="button" data-action="open-session" data-session-id="${escapeHtml(dstId)}" title="跳转接力新会话">
+                <button class="lineage-node" type="button" data-action="open-session" data-session-id="${escapeHtml(dstId)}" title="Open forked session">
                   <span class="lineage-node-text">
                     <span class="lineage-node-title">${escapeHtml(dstTitle)}</span>
                     <span class="lineage-node-sub mono">@ ${escapeHtml(shortPath(dstDir, 2))}</span>
@@ -2099,7 +2099,7 @@
                 <span class="mono">${escapeHtml(fmtRelTime(rec.createdAt))}${rec.model ? ` · ${escapeHtml(rec.model)}` : ''}</span>
                 ${
                   archiveFile
-                    ? `<button class="btn btn-xs btn-ghost" type="button" data-action="preview-archive" data-filename="${escapeHtml(archiveFile)}">预览交接包</button>`
+                    ? `<button class="btn btn-xs btn-ghost" type="button" data-action="preview-archive" data-filename="${escapeHtml(archiveFile)}">Preview Bundle</button>`
                     : ''
                 }
               </div>
@@ -2113,8 +2113,8 @@
       if (state.archives.length === 0) {
         archivesList.innerHTML = `
           <div class="card empty-state">
-            <h3 class="empty-title">暂无导出档案</h3>
-            <p class="empty-desc">点击「导出 MD」或触发 &gt;10 KB 自动落盘移交时，交接文档将保存在 handoffs/*.md。</p>
+            <h3 class="empty-title">No exported archives yet</h3>
+            <p class="empty-desc">Click Export MD or trigger a &gt;10 KB file-mode handoff to save Markdown bundles in handoffs/*.md.</p>
           </div>`;
       } else {
         const parts = [];
@@ -2130,8 +2130,8 @@
                 </div>
               </div>
               <div class="archive-actions">
-                <button class="btn btn-xs btn-secondary" type="button" data-action="preview-archive" data-filename="${fnameEsc}">预览</button>
-                <button class="btn btn-xs btn-ghost" type="button" data-action="copy-archive" data-filename="${fnameEsc}">复制</button>
+                <button class="btn btn-xs btn-secondary" type="button" data-action="preview-archive" data-filename="${fnameEsc}">Preview</button>
+                <button class="btn btn-xs btn-ghost" type="button" data-action="copy-archive" data-filename="${fnameEsc}">Copy</button>
               </div>
             </article>`);
         }
@@ -2144,7 +2144,7 @@
      11. Preview Modal Controls
      ======================================================================== */
 
-  function openModal({ title = '预览', content = '', badges = [], filePath = '' }) {
+  function openModal({ title = 'Preview', content = '', badges = [], filePath = '' }) {
     state.modalContent = String(content || '');
 
     const modal = $('preview-modal');
@@ -2353,8 +2353,8 @@
         runPreviewNow();
         showToast(
           removedCount > 0
-            ? `已截断至第 #${maxIndex} 轮（移除后续 ${removedCount} 轮）`
-            : `已保留第 #1–#${maxIndex} 轮`,
+            ? `Truncated at turn #${maxIndex} (dropped ${removedCount} later turn${removedCount === 1 ? '' : 's'})`
+            : `Kept turns #1–#${maxIndex}`,
           'info',
         );
       } else if (action === 'expand-full') {
@@ -2489,7 +2489,7 @@
     $('btn-modal-copy')?.addEventListener('click', async () => {
       if (!state.modalContent) return;
       const ok = await copyToClipboard(state.modalContent);
-      showToast(ok ? '已复制完整 Markdown 到剪贴板' : '复制失败，请手动选中复制', ok ? 'success' : 'warn');
+      showToast(ok ? 'Copied full Markdown to clipboard' : 'Copy failed; select and copy manually', ok ? 'success' : 'warn');
     });
 
     document.addEventListener('keydown', (ev) => {

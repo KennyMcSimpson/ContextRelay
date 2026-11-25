@@ -46,7 +46,7 @@ function buildSyntheticFixture(dir) {
       content: [
         '<ADDITIONAL_METADATA>workspace=e:/demo/app;os=windows</ADDITIONAL_METADATA>',
         '<USER_SETTINGS_CHANGE>changed model to gemini-2.5-pro</USER_SETTINGS_CHANGE>',
-        '<USER_REQUEST>请修复登录接口鉴权 bug 并补充单元测试</USER_REQUEST>',
+        '<USER_REQUEST>Fix login endpoint auth bug and add unit tests</USER_REQUEST>',
       ].join('\n'),
     },
     {
@@ -59,7 +59,7 @@ function buildSyntheticFixture(dir) {
       input_tokens: 12000,
       cache_read_tokens: 4000,
       output_tokens: 350,
-      content: '先读取 src/auth.mjs 定位鉴权失效原因。',
+      content: 'Reading src/auth.mjs first to locate the auth failure.',
       tool_calls: [
         {
           name: 'read_file',
@@ -85,7 +85,7 @@ function buildSyntheticFixture(dir) {
       input_tokens: 19500,
       cache_read_tokens: 6000,
       output_tokens: 480,
-      content: '已定位 token 过期校验逻辑问题，现在修改 src/auth.mjs 并新增测试文件。',
+      content: 'Found the token expiry logic bug; updating src/auth.mjs and adding a test file.',
       tool_calls: [
         {
           name: 'edit_file',
@@ -129,7 +129,7 @@ function buildSyntheticFixture(dir) {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T10:01:00.000Z',
-      content: '<USER_REQUEST>顺便把全仓库编译噪音日志扫一遍看看</USER_REQUEST>',
+      content: '<USER_REQUEST>Run a full repo scan to inspect compiler noise logs</USER_REQUEST>',
     },
     {
       step_index: 7,
@@ -141,7 +141,7 @@ function buildSyntheticFixture(dir) {
       input_tokens: 28000,
       cache_read_tokens: 8000,
       output_tokens: 120,
-      content: '我来执行全仓库扫描并检查错误日志。',
+      content: 'Running the repository scan and checking lint errors.',
       tool_calls: [
         {
           name: 'run_command',
@@ -177,7 +177,7 @@ function buildSyntheticFixture(dir) {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T10:02:00.000Z',
-      content: '<USER_REQUEST>确认 auth 模块导出清单</USER_REQUEST>',
+      content: '<USER_REQUEST>Confirm the exported API of the auth module</USER_REQUEST>',
     },
     {
       step_index: 11,
@@ -189,7 +189,7 @@ function buildSyntheticFixture(dir) {
       input_tokens: 30000,
       cache_read_tokens: 5000,
       output_tokens: 210,
-      content: '已确认 auth 模块仅导出 verifyToken 和 refreshSession。',
+      content: 'Confirmed the auth module exports only verifyToken and refreshSession.',
     },
 
     // Turn 4: additional doc update
@@ -199,7 +199,7 @@ function buildSyntheticFixture(dir) {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T10:03:00.000Z',
-      content: '<USER_REQUEST>补充变更说明文档</USER_REQUEST>',
+      content: '<USER_REQUEST>Update changelog documentation</USER_REQUEST>',
     },
     {
       step_index: 13,
@@ -211,7 +211,7 @@ function buildSyntheticFixture(dir) {
       input_tokens: 32000,
       cache_read_tokens: 5000,
       output_tokens: 180,
-      content: '已更新 CHANGELOG.md。',
+      content: 'Updated CHANGELOG.md.',
       tool_calls: [
         {
           name: 'write_file',
@@ -235,7 +235,7 @@ function buildSyntheticFixture(dir) {
       type: 'USER_INPUT',
       status: 'DONE',
       created_at: '2026-11-24T10:04:00.000Z',
-      content: '<USER_REQUEST>总结最终结论并输出验证结果</USER_REQUEST>',
+      content: '<USER_REQUEST>Summarize final conclusions and verification results</USER_REQUEST>',
     },
     {
       step_index: 16,
@@ -247,7 +247,7 @@ function buildSyntheticFixture(dir) {
       input_tokens: 34000,
       cache_read_tokens: 6000,
       output_tokens: 260,
-      content: '鉴权逻辑已修复，单元测试全部通过，可以准备合并。',
+      content: 'Auth logic is fixed and all unit tests pass; ready to merge.',
     },
     {
       step_index: 17,
@@ -386,7 +386,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
     const turn1 = parsed.turns[0];
     assert.equal(turn1.id, 'turn-1');
     assert.equal(turn1.index, 1);
-    assert.equal(turn1.userText, '请修复登录接口鉴权 bug 并补充单元测试');
+    assert.equal(turn1.userText, 'Fix login endpoint auth bug and add unit tests');
     assert.ok(!turn1.userText.includes('<ADDITIONAL_METADATA>'));
     assert.ok(!turn1.userText.includes('<USER_SETTINGS_CHANGE>'));
 
@@ -439,7 +439,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
         type: 'USER_INPUT',
         status: 'DONE',
         created_at: '2026-11-24T12:00:00.000Z',
-        content: '<USER_REQUEST>依次读文件并执行命令</USER_REQUEST>',
+        content: '<USER_REQUEST>Read a file then run a command</USER_REQUEST>',
       },
       {
         step_index: 1,
@@ -449,7 +449,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
         model: 'gemini-2.5-pro',
         input_tokens: 1000,
         output_tokens: 100,
-        content: '执行两步工具调用。',
+        content: 'Executing two tool calls.',
         tool_calls: [
           { name: 'read_file', arguments: { Path: 'E:/repo/a.mjs' } },
           { name: 'run_command', arguments: { CommandLine: 'echo ok' } },
@@ -498,7 +498,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
         type: 'USER_INPUT',
         status: 'DONE',
         created_at: '2026-11-24T12:10:00.000Z',
-        content: '<USER_REQUEST>分段读取 a.js</USER_REQUEST>',
+        content: '<USER_REQUEST>Read a.js in two line ranges</USER_REQUEST>',
       },
       {
         step_index: 1,
@@ -520,7 +520,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
         type: 'USER_INPUT',
         status: 'DONE',
         created_at: '2026-11-24T12:11:00.000Z',
-        content: '<USER_REQUEST>修改 a.js 后复核内容</USER_REQUEST>',
+        content: '<USER_REQUEST>Edit a.js and verify updated content</USER_REQUEST>',
       },
       {
         step_index: 5,
@@ -592,7 +592,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
         status: 'DONE',
         created_at: '2026-11-24T11:00:00.000Z',
         content:
-          '<SYSTEM_MESSAGE>\n[Message] timestamp=2026-11-24T11:00:00Z sender=parent-conv-123 priority=MESSAGE_PRIORITY_HIGH content=执行并行单测编写任务\n</SYSTEM_MESSAGE>',
+          '<SYSTEM_MESSAGE>\n[Message] timestamp=2026-11-24T11:00:00Z sender=parent-conv-123 priority=MESSAGE_PRIORITY_HIGH content=Execute parallel unit test authoring task\n</SYSTEM_MESSAGE>',
       },
       {
         step_index: 1,
@@ -603,7 +603,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
         model: 'gemini-2.5-pro',
         input_tokens: 4500,
         output_tokens: 200,
-        content: '正在编写测试。',
+        content: 'Writing unit tests.',
         tool_calls: [
           {
             name: 'send_message',
@@ -618,7 +618,7 @@ describe('turn-parser: parseSessionTranscript, regression edge cases & subagent 
     assert.equal(parsed.parentSessionId, 'parent-conv-123');
     assert.equal(parsed.turns.length, 1);
     assert.equal(parsed.turns[0].sourceType, 'SYSTEM_MESSAGE');
-    assert.ok(parsed.turns[0].userText.includes('执行并行单测编写任务'));
+    assert.ok(parsed.turns[0].userText.includes('Execute parallel unit test authoring task'));
   });
 });
 
